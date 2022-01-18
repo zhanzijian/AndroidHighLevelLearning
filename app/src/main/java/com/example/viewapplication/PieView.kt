@@ -29,8 +29,8 @@ class PieView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
             if (index == 0) {
                 canvas.save()
                 //注意这里角度的计算 startAngel + angel.toDouble()/2
-                val dx = cos(Math.toRadians(startAngel + angel.toDouble()/2)) * PIE_MOVE_LENGTH
-                val dy = sin(Math.toRadians(startAngel + angel.toDouble()/2)) * PIE_MOVE_LENGTH
+                val dx = cos(Math.toRadians(startAngel + angel.toDouble() / 2)) * PIE_MOVE_LENGTH
+                val dy = sin(Math.toRadians(startAngel + angel.toDouble() / 2)) * PIE_MOVE_LENGTH
                 canvas.translate(dx.toFloat(), dy.toFloat())
             }
             canvas.drawArc(
