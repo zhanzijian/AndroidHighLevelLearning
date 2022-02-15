@@ -1,9 +1,10 @@
-package com.example.viewapplication
+package com.example.viewapplication.view
 
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import com.example.viewapplication.dp
 import kotlin.math.cos
 import kotlin.math.sin
 

@@ -1,4 +1,4 @@
-package com.example.viewapplication
+package com.example.viewapplication.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import com.example.viewapplication.dp
 import kotlin.math.cos
 import kotlin.math.sin
 
