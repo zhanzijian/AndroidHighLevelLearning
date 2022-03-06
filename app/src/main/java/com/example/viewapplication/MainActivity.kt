@@ -1,12 +1,16 @@
 package com.example.viewapplication
 
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.doAfterTextChanged
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
+import com.example.viewapplication.view.EsPathView
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -93,6 +97,9 @@ class MainActivity : AppCompatActivity() {
 //        inputView.doAfterTextChanged {
 //            showView.text = it.toString().subCoordinateIfNotStandard()
 //        }
+        findViewById<EsPathView>(R.id.path).apply {
+            postDelayed({ startBallAnimator() },2000)
+        }
 
     }
 

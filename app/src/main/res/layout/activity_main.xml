@@ -21,11 +21,12 @@
         android:layout_height="50dp"
         />-->
 
-    <com.example.viewapplication.view.SquareImageView
-        android:layout_width="200dp"
-        android:layout_height="300dp"
-        android:src="@drawable/avatar_rengwuxian"
-        android:scaleType="centerCrop"
+    <com.example.viewapplication.view.EsPathView
+        android:id="@+id/path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="#D6A67F"
         />
 
 </RelativeLayout>
