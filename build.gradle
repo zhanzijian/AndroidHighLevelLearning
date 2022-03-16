@@ -16,3 +16,8 @@ buildscript {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// 插入第二三任务中间执行
+afterEvaluate {
+
+}

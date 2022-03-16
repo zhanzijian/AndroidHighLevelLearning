@@ -11,11 +11,16 @@ import androidx.core.widget.doAfterTextChanged
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
 import com.example.viewapplication.view.EsPathView
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.SingleObserver
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.functions.Function
+import io.reactivex.rxjava3.internal.operators.single.SingleJust
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.*
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.lang.reflect.InvocationHandler
@@ -32,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 //        val retrofit = Retrofit.Builder()
 //            .baseUrl("https://api.github.com/")
 //            .addConverterFactory(GsonConverterFactory.create())
-//            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
 //            .build()
 //        val service = GithubService::class.java
 //        val githubService = retrofit.create(service)
@@ -101,6 +106,25 @@ class MainActivity : AppCompatActivity() {
             postDelayed({ startBallAnimator() },2000)
         }
 
+        val singleJust = SingleJust(1)
+        val singleString = singleJust.map(object : Function<Int, String> {
+            override fun apply(t: Int): String {
+                return t.toString()
+            }
+        })
+        singleString.subscribe(object : SingleObserver<String> {
+            override fun onSubscribe(d: Disposable) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSuccess(t: String) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onError(e: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
     }
 
     /**
