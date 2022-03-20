@@ -8,4 +8,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ViewApplication"
 include ':app'
+include ':plugin'
 // 插入第一二阶段执行的任务

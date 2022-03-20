@@ -1,7 +1,33 @@
+import java.security.cert.Extension
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
 }
+
+// 简易插件手写
+//apply plugin: RobotPlugin
+//class RobotPlugin implements Plugin<Project>{
+//
+//    @Override
+//    void apply(Project project) {
+//        // 配置阶段就会执行
+//        def extension = project.extensions.create("robot",RobotExtension)
+//        // 插件执行的时候才会调用
+//        project.afterEvaluate {
+//            println "hello ${extension.name}"
+//        }
+//    }
+//}
+//
+//class RobotExtension {
+//    def name = 'zhanzijian'
+//}
+//
+//robot {
+//    name = 'zzj!!!'
+//}
+
 
 android {
     compileSdk 31
@@ -44,4 +70,5 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.3'
+    implementation 'com.squareup.okio:okio:3.0.0'
 }
