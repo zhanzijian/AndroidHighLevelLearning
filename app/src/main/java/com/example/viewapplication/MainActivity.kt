@@ -30,18 +30,91 @@ import java.lang.reflect.Proxy
 private const val COMMA = "."
 private const val COORDINATE_MIN_SCALE = 6
 private const val COORDINATE_MAX_SCALE = 18
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        val retrofit = Retrofit.Builder()
-//            .baseUrl("https://api.github.com/")
-//            .addConverterFactory(GsonConverterFactory.create())
-//            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-//            .build()
-//        val service = GithubService::class.java
-//        val githubService = retrofit.create(service)
-//        val repos: Call<List<Repo>> = githubService.listRepos("octocat")
+
+        //路径动画
+        findViewById<EsPathView>(R.id.path).apply {
+            postDelayed({ startBallAnimator() }, 2000)
+        }
+
+
+    }
+
+    /**
+     * Rxjava source analysis
+     */
+    private fun rxjavaSourceAnalysis() {
+        val singleJust = SingleJust(1)
+        val singleString = singleJust.map(object : Function<Int, String> {
+            override fun apply(t: Int): String {
+                return t.toString()
+            }
+        })
+        singleString.subscribe(object : SingleObserver<String> {
+            override fun onSubscribe(d: Disposable) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSuccess(t: String) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onError(e: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    /**
+     * Okhttp source analysis
+     */
+    private fun okHttpSourceAnalysis() {
+        val url = "https://api.github.com/users/rengwuxian/repos"
+        val hostname = "api.github.com"
+
+        val client = OkHttpClient.Builder()
+            .build()
+        val request: Request = Request.Builder()
+            .url(url)
+            .build()
+        client.newCall(request)
+            .enqueue(object : okhttp3.Callback {
+                override fun onFailure(call: okhttp3.Call, e: IOException) {
+                    e.printStackTrace()
+                }
+
+                override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                    println("Response status code: ${response.code}")
+                }
+            })
+    }
+
+    /**
+     * Retrofit source analysis
+     */
+    private fun retrofitSourceAnalysis() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.github.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .build()
+        val service = GithubService::class.java
+        val githubService = retrofit.create(service)
+        val repos: Call<List<Repo>> = githubService.listRepos("octocat")
+        repos.enqueue(object : Callback<List<Repo>?> {
+            override fun onFailure(call: Call<List<Repo>?>, t: Throwable) {
+//                findViewById<TextView>(R.id.textview).text = t.message
+            }
+
+            override fun onResponse(call: Call<List<Repo>?>, response: Response<List<Repo>?>) {
+//                findViewById<TextView>(R.id.show).text = response.body()!![0].name
+            }
+        })
+
 
 //        Proxy.newProxyInstance(
 //            service.classLoader, arrayOf<Class<*>>(service),
@@ -65,66 +138,7 @@ class MainActivity : AppCompatActivity() {
 //                    ) else loadServiceMethod(method).invoke(args)
 //                }
 //            })
-//        repos.enqueue(object : Callback<List<Repo>?> {
-//            override fun onFailure(call: Call<List<Repo>?>, t: Throwable) {
-//                findViewById<TextView>(R.id.textview).text = t.message
-//            }
-//
-//            override fun onResponse(call: Call<List<Repo>?>, response: Response<List<Repo>?>) {
-//                findViewById<TextView>(R.id.show).text = response.body()!![0].name
-//            }
-//        })
 
-
-//        val url = "https://api.github.com/users/rengwuxian/repos"
-//        val hostname = "api.github.com"
-//
-//        val client = OkHttpClient.Builder()
-//            .build()
-//        val request: Request = Request.Builder()
-//            .url(url)
-//            .build()
-//        client.newCall(request)
-//            .enqueue(object : okhttp3.Callback {
-//                override fun onFailure(call: okhttp3.Call, e: IOException) {
-//                    e.printStackTrace()
-//                }
-//
-//                override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-//                    println("Response status code: ${response.code}")
-//                }
-//            })
-//
-//
-//
-//        val inputView = findViewById<AppCompatEditText>(R.id.input)
-//        val showView = findViewById<TextView>(R.id.show)
-//        inputView.doAfterTextChanged {
-//            showView.text = it.toString().subCoordinateIfNotStandard()
-//        }
-        findViewById<EsPathView>(R.id.path).apply {
-            postDelayed({ startBallAnimator() },2000)
-        }
-
-        val singleJust = SingleJust(1)
-        val singleString = singleJust.map(object : Function<Int, String> {
-            override fun apply(t: Int): String {
-                return t.toString()
-            }
-        })
-        singleString.subscribe(object : SingleObserver<String> {
-            override fun onSubscribe(d: Disposable) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onSuccess(t: String) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onError(e: Throwable) {
-                TODO("Not yet implemented")
-            }
-        })
     }
 
     /**
@@ -134,7 +148,7 @@ class MainActivity : AppCompatActivity() {
      */
     fun String.subCoordinateIfNotStandard(): String {
         //没有小数点，自动补6位
-        if (isNullOrEmpty()){
+        if (isNullOrEmpty()) {
             return this
         }
         if (!contains(COMMA)) {
@@ -142,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val commaIndex = indexOf(".")
-        val lengthAfterComma = length - commaIndex -1
+        val lengthAfterComma = length - commaIndex - 1
         //小数点后小于6位的自动补0至6位
         if (lengthAfterComma < COORDINATE_MIN_SCALE) {
             val standardBuilder = StringBuilder(this)
