@@ -1,47 +1,46 @@
 package com.example.viewapplication
 
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.widget.doAfterTextChanged
+import com.example.viewapplication.databinding.ActivityMainBinding
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
-import com.example.viewapplication.view.EsPathView
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.Function
 import io.reactivex.rxjava3.internal.operators.single.SingleJust
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import retrofit2.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
 
 private const val COMMA = "."
 private const val COORDINATE_MIN_SCALE = 6
 private const val COORDINATE_MAX_SCALE = 18
 
 class MainActivity : AppCompatActivity() {
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
+        setContentView(binding.root)
         //路径动画
-        findViewById<EsPathView>(R.id.path).apply {
-            postDelayed({ startBallAnimator() }, 2000)
-        }
+        binding.path.postDelayed(binding.path::startBallAnimator,2000)
 
+    }
 
+    private fun glideSourceAnalysis() {
+//        Glide.with(this)
+//            .load(R.mipmap.ic_launcher_round)
+//            .placeholder(R.mipmap.ic_launcher)
+//            .error(R.mipmap.ic_launcher)
+//            .into(findViewById(R.id.imageView))
     }
 
     /**

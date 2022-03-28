@@ -28,8 +28,10 @@ plugins {
 //    name = 'zzj!!!'
 //}
 
-
 android {
+    buildFeatures {
+        viewBinding true
+    }
     compileSdk 31
 
     defaultConfig {
