@@ -31,7 +31,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         //路径动画
-        binding.path.postDelayed(binding.path::startBallAnimator,2000)
+        binding.path.apply {
+            postDelayed({
+                startLeftTopBallAnimator()
+                startRightTopBallAnimator()
+                startLeftBottomBallAnimator()
+            },2000)
+        }
+
 
     }
 

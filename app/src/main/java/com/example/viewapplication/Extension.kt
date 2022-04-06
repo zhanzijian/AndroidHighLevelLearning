@@ -6,8 +6,11 @@
  */
 package com.example.viewapplication
 
+import android.content.Context
 import android.content.res.Resources
+import android.os.Build
 import android.util.TypedValue
+import java.lang.Exception
 
 val Float.dp: Float
     get() = TypedValue.applyDimension(
@@ -27,3 +30,15 @@ val Float.sp: Float
 
 val Int.sp
     get() = this.toFloat().sp
+
+fun getColorById(context: Context?,resId :Int): Int {
+    if (context == null) {
+        return 0
+    }
+    val res = context.resources ?: return 0
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        res.getColor(resId, context.theme)
+    } else {
+        res.getColor(resId)
+    }
+}
