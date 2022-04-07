@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import com.example.viewapplication.R
@@ -25,6 +26,9 @@ private val CIRCLE_RADIUS = 40f.dp
 
 private val PATH_STROKE_WIDTH = 2f.dp
 
+private const val ANIMATION_START_DELAY = 2000L // 动画启动延时
+private const val ANIMATION_DURATION = 4000L // 动画运行时长
+private const val TAG = "EsPathView"
 /**
  *
  * @description 储能动图路径和小球动画
@@ -91,12 +95,10 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerX = width / 2f
         val centerY = height / 2f
 
-        // 左上运动小球初始位置
-        leftTopPos[0] =
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + MAX_BALL_RADIUS)
+        // path初始位置
+        leftTopPos[0] = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE)
         leftTopPos[1] = centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
-
-        // 移动至小球初始位置
+        Log.d(TAG, "初始化: leftTopPos[0]：${leftTopPos[0]},leftTopPos[1]:${leftTopPos[1]}")
         leftTopPath.moveTo(
             leftTopPos[0],
             leftTopPos[1]
@@ -131,15 +133,13 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerX = width / 2f
         val centerY = height / 2f
 
-        // 右上运动小球初始位置
-        rightTopPos[0] =
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + MAX_BALL_RADIUS)
+        // path初始位置
+        rightTopPos[0] = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
         rightTopPos[1] = centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
 
-        // 移动至小球初始位置
         rightTopPath.moveTo(
-            rightTopPos[0],
-            rightTopPos[1]
+            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
+            centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
         )
         rightTopPath.lineTo(
             centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
@@ -171,15 +171,14 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerX = width / 2f
         val centerY = height / 2f
 
-        // 左下运动小球初始位置
-        leftBottomPos[0] =
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + MAX_BALL_RADIUS)
+        // path初始位置
+        leftBottomPos[0] = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
         leftBottomPos[1] = centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
 
-        // 移动至小球初始位置
+        // 移动至path初始位置
         leftBottomPath.moveTo(
-            leftBottomPos[0],
-            leftBottomPos[1]
+            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
+            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
         )
         leftBottomPath.lineTo(
             centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
@@ -211,15 +210,14 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerX = width / 2f
         val centerY = height / 2f
 
-        // 右下运动小球初始位置
-        rightBottomPos[0] =
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + MAX_BALL_RADIUS)
+        // 小球初始位置
+        rightBottomPos[0] = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
         rightBottomPos[1] = centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
 
-        // 移动至小球初始位置
+        // 移动至path初始位置
         rightBottomPath.moveTo(
-            rightBottomPos[0],
-            rightBottomPos[1]
+            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
+            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
         )
         rightBottomPath.lineTo(
             centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
@@ -281,23 +279,28 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             progressPaint
         )
 
-
-        // 画运动小球内径
+        // 初始小球圆心x轴位置
+        val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
+        val pos0 = leftTopPos[0]
+        val pos1 = leftTopPos[1]
+        val ballCenterX = maxOf(pos0,ballStartX)
+        Log.d(TAG, "使用时leftTopPos[0]：${leftTopPos[0]},leftTopPos[1]:${leftTopPos[1]}")
         ballPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
         canvas.drawCircle(
-            leftTopPos[0],
-            leftTopPos[1],
+            ballCenterX,
+            pos1,
             BALL_INNER_RADIUS,
             ballPaint
         )
         // 画运动小球外径
         ballPaint.color = getColorById(context, R.color.yellow_33_f0cf00_color)
         canvas.drawCircle(
-            leftTopPos[0],
-            leftTopPos[1],
+            ballCenterX,
+            pos1,
             BALL_OUTER_RADIUS,
             ballPaint
         )
+
         // 画路径
         pathPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
         canvas.drawPath(leftTopPath, pathPaint)
@@ -325,20 +328,24 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             progressPaint
         )
 
-
+        // 初始小球圆心x轴位置
+        val ballStartX = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
+        val pos0 = rightTopPos[0]
+        val pos1 = rightTopPos[1]
+        val ballCenterX = minOf(pos0,ballStartX)
         // 画运动小球内径
         ballPaint.color = getColorById(context, R.color.red_f56d66_color)
         canvas.drawCircle(
-            rightTopPos[0],
-            rightTopPos[1],
+            ballCenterX,
+            pos1,
             BALL_INNER_RADIUS,
             ballPaint
         )
         // 画运动小球外径
         ballPaint.color = getColorById(context, R.color.red_33_f56d66_color)
         canvas.drawCircle(
-            rightTopPos[0],
-            rightTopPos[1],
+            ballCenterX,
+            pos1,
             BALL_OUTER_RADIUS,
             ballPaint
         )
@@ -369,20 +376,24 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             progressPaint
         )
 
-
+        // 初始小球圆心x轴位置
+        val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
+        val pos0 = leftBottomPos[0]
+        val pos1 = leftBottomPos[1]
+        val ballCenterX = maxOf(pos0,ballStartX)
         // 画运动小球内径
         ballPaint.color = getColorById(context, R.color.green_aed681_color)
         canvas.drawCircle(
-            leftBottomPos[0],
-            leftBottomPos[1],
+            ballCenterX,
+            pos1,
             BALL_INNER_RADIUS,
             ballPaint
         )
         // 画运动小球外径
         ballPaint.color = getColorById(context, R.color.green_33_aed681_color)
         canvas.drawCircle(
-            leftBottomPos[0],
-            leftBottomPos[1],
+            ballCenterX,
+            pos1,
             BALL_OUTER_RADIUS,
             ballPaint
         )
@@ -392,20 +403,20 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawRightBottom(centerX: Float, centerY: Float, canvas: Canvas) {
-        /*// 画圆
-        circlePaint.color = getColorById(context, R.color.green_33_aed681_color)
+        // 画圆
+        circlePaint.color = getColorById(context, R.color.orange_4d_fda23a_color)
         canvas.drawCircle(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
+            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
             centerY + (VERTICAL_DISTANCE + ARC_RADIUS),
             CIRCLE_RADIUS,
             circlePaint
         )
         // 画进度
-        progressPaint.color = getColorById(context, R.color.green_aed681_color)
+        progressPaint.color = getColorById(context, R.color.orange_fda23a_color)
         canvas.drawArc(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
+            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
             centerY + (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
+            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
             centerY + (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
             -90f,
             90f,
@@ -414,68 +425,144 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         )
 
 
+        // 初始小球圆心x轴位置
+        val ballStartX = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
+        val pos0 = rightBottomPos[0]
+        val pos1 = rightBottomPos[1]
+        val ballCenterX = minOf(pos0,ballStartX)
+        println("ballStartX:$ballStartX，pos0:$pos0, pos1:$pos1, ballCenterX:$ballCenterX")
         // 画运动小球内径
-        ballPaint.color = getColorById(context, R.color.green_aed681_color)
+        ballPaint.color = getColorById(context, R.color.orange_fda23a_color)
         canvas.drawCircle(
-            leftBottomPos[0],
-            leftBottomPos[1],
+            pos0,
+            pos1,
             BALL_INNER_RADIUS,
             ballPaint
         )
         // 画运动小球外径
-        ballPaint.color = getColorById(context, R.color.green_33_aed681_color)
+        ballPaint.color = getColorById(context, R.color.orange_33_fda23a_color)
         canvas.drawCircle(
-            leftBottomPos[0],
-            leftBottomPos[1],
+            pos0,
+            pos1,
             BALL_OUTER_RADIUS,
             ballPaint
         )
         // 画路径
-        pathPaint.color = getColorById(context, R.color.green_aed681_color)
-        canvas.drawPath(leftBottomPath, pathPaint)*/
+        pathPaint.color = getColorById(context, R.color.orange_fda23a_color)
+        canvas.drawPath(rightBottomPath, pathPaint)
     }
 
-    fun startLeftTopBallAnimator() {
+    /**
+     * Start left top ball animator
+     * 开始左上小球的动画
+     * @param direction BallDirection.LEFT_TOP_TO_CENTER or BallDirection.CENTER_TO_LEFT_TOP
+     */
+    fun startLeftTopBallAnimator(direction: BallDirection) {
         val pathMeasure = PathMeasure(leftTopPath, false)
         val length = pathMeasure.length
+        if (length == 0f) {
+            return
+        }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.duration = 5000
+        valueAnimator.startDelay = ANIMATION_START_DELAY
+        valueAnimator.duration = ANIMATION_DURATION
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
             pathMeasure.getPosTan(animatedValue, leftTopPos, leftTopTan)
+            Log.d(TAG, "新鲜出炉的leftTopPos[0]：${leftTopPos[0]},leftTopPos[1]:${leftTopPos[1]}")
             invalidate()
+        }
+        if (direction == BallDirection.CENTER_TO_LEFT_TOP) {
+            valueAnimator.reverse()
+            return
         }
         valueAnimator.start()
     }
 
-    fun startRightTopBallAnimator() {
+    /**
+     * Start right top ball animator
+     * 开始右上小球的动画
+     * @param direction BallDirection.RIGHT_TOP_TO_CENTER or BallDirection.CENTER_TO_RIGHT_TOP
+     */
+    fun startRightTopBallAnimator(direction: BallDirection) {
         val pathMeasure = PathMeasure(rightTopPath, false)
         val length = pathMeasure.length
+        if (length == 0f) {
+            return
+        }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.duration = 5000
+        valueAnimator.startDelay = ANIMATION_START_DELAY
+        valueAnimator.duration = ANIMATION_DURATION
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
             pathMeasure.getPosTan(animatedValue, rightTopPos, rightTopTan)
             invalidate()
         }
+
+        if (direction == BallDirection.CENTER_TO_RIGHT_TOP) {
+            valueAnimator.reverse()
+            return
+        }
         valueAnimator.start()
     }
 
-    fun startLeftBottomBallAnimator() {
+    /**
+     * Start left bottom ball animator
+     * 开始左下小球的动画
+     * @param direction BallDirection.LEFT_BOTTOM_TO_CENTER or BallDirection.CENTER_TO_LEFT_BOTTOM
+     */
+    fun startLeftBottomBallAnimator(direction: BallDirection) {
         val pathMeasure = PathMeasure(leftBottomPath, false)
         val length = pathMeasure.length
+        if (length == 0f) {
+            return
+        }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.duration = 5000
+        valueAnimator.startDelay = ANIMATION_START_DELAY
+        valueAnimator.duration = ANIMATION_DURATION
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
             pathMeasure.getPosTan(animatedValue, leftBottomPos, leftBottomTan)
             invalidate()
+        }
+        if (direction == BallDirection.CENTER_TO_LEFT_BOTTOM) {
+            valueAnimator.reverse()
+            return
+        }
+        valueAnimator.start()
+    }
+
+    /**
+     * Start right bottom ball animator
+     * 开始右下小球的动画
+     * {@link BallDirection.RIGHT_BOTTOM_TO_CENTER }
+     * @param direction  BallDirection.RIGHT_BOTTOM_TO_CENTER or BallDirection.CENTER_TO_RIGHT_BOTTOM
+     */
+    fun startRightBottomBallAnimator(direction: BallDirection) {
+        val pathMeasure = PathMeasure(rightBottomPath, false)
+        val length = pathMeasure.length
+        if (length == 0f) {
+            return
+        }
+        val valueAnimator = ValueAnimator.ofFloat(0f, length)
+        valueAnimator.interpolator = LinearInterpolator()
+        valueAnimator.startDelay = ANIMATION_START_DELAY
+        valueAnimator.duration = ANIMATION_DURATION
+        valueAnimator.repeatCount = ValueAnimator.INFINITE
+        valueAnimator.addUpdateListener { animation: ValueAnimator ->
+            val animatedValue = animation.animatedValue as Float
+            pathMeasure.getPosTan(animatedValue, rightBottomPos, rightBottomTan)
+            invalidate()
+        }
+        if (direction == BallDirection.CENTER_TO_RIGHT_BOTTOM) {
+            valueAnimator.reverse()
+            return
         }
         valueAnimator.start()
     }
@@ -495,6 +582,48 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             (width + EXTRA_WIDTH).toInt(),
             (height + EXTRA_WIDTH).toInt()
         )
+    }
+
+    enum class BallDirection(val nativeInt: Int) {
+        /**
+         * 左上到中间的方向
+         */
+        LEFT_TOP_TO_CENTER(0),
+
+        /**
+         * 中间到左上的方向
+         */
+        CENTER_TO_LEFT_TOP(1),
+
+        /**
+         * 左下到中间的方向
+         */
+        LEFT_BOTTOM_TO_CENTER(2),
+
+        /**
+         * 中间到左下的方向
+         */
+        CENTER_TO_LEFT_BOTTOM(3),
+
+        /**
+         * 右上到中间的方向
+         */
+        RIGHT_TOP_TO_CENTER(4),
+
+        /**
+         * 中间到右上的方向
+         */
+        CENTER_TO_RIGHT_TOP(5),
+
+        /**
+         * 右下到中间的方向
+         */
+        RIGHT_BOTTOM_TO_CENTER(6),
+
+        /**
+         * 中间到右下的方向
+         */
+        CENTER_TO_RIGHT_BOTTOM(7);
     }
 
 }

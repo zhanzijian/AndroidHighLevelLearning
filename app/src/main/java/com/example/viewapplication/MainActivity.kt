@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.viewapplication.databinding.ActivityMainBinding
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
+import com.example.viewapplication.view.EsPathView
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.Function
@@ -27,16 +28,18 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         //路径动画
-        binding.path.apply {
-            postDelayed({
-                startLeftTopBallAnimator()
-                startRightTopBallAnimator()
-                startLeftBottomBallAnimator()
-            },2000)
+        binding.path.viewTreeObserver.addOnGlobalLayoutListener {
+            binding.path.apply {
+                startLeftTopBallAnimator(EsPathView.BallDirection.LEFT_TOP_TO_CENTER)
+                startRightTopBallAnimator(EsPathView.BallDirection.RIGHT_TOP_TO_CENTER)
+                startLeftBottomBallAnimator(EsPathView.BallDirection.LEFT_BOTTOM_TO_CENTER)
+                startRightBottomBallAnimator(EsPathView.BallDirection.RIGHT_BOTTOM_TO_CENTER)
+            }
         }
 
 
