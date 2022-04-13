@@ -12,13 +12,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ViewApplication">
         <activity
-            android:name=".plugin.PluginActivity"
-            android:exported="true">
+            android:name=".annotationProcessor.AnnotationProcessorActivity"
+            android:exported="true" >
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
+        </activity>
+        <activity
+            android:name=".plugin.PluginActivity"
+            android:exported="true">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".MainActivity"

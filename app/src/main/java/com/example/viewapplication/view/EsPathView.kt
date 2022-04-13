@@ -1,12 +1,16 @@
 package com.example.viewapplication.view
 
+import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
+import android.util.SparseArray
 import android.view.View
 import android.view.animation.LinearInterpolator
+import androidx.core.util.forEach
+import androidx.core.util.isEmpty
 import com.example.viewapplication.R
 import com.example.viewapplication.dp
 import com.example.viewapplication.getColorById
@@ -258,27 +262,6 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawLeftTop(centerX: Float, centerY: Float, canvas: Canvas) {
-        // 画圆
-        circlePaint.color = getColorById(context, R.color.yellow_4d_f0cf00_color)
-        canvas.drawCircle(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
-            CIRCLE_RADIUS,
-            circlePaint
-        )
-        // 画进度
-        progressPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
-        canvas.drawArc(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
-            -90f,
-            90f,
-            false,
-            progressPaint
-        )
-
         // 初始小球圆心x轴位置
         val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
         val pos0 = leftTopPos[0]
@@ -304,6 +287,27 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // 画路径
         pathPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
         canvas.drawPath(leftTopPath, pathPaint)
+
+        // 画圆
+        circlePaint.color = getColorById(context, R.color.yellow_4d_f0cf00_color)
+        canvas.drawCircle(
+            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
+            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
+            CIRCLE_RADIUS,
+            circlePaint
+        )
+        // 画进度
+        progressPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
+        canvas.drawArc(
+            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
+            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
+            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
+            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
+            -90f,
+            90f,
+            false,
+            progressPaint
+        )
     }
 
     private fun drawRightTop(centerX: Float, centerY: Float, canvas: Canvas) {
@@ -502,7 +506,6 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             pathMeasure.getPosTan(animatedValue, rightTopPos, rightTopTan)
             invalidate()
         }
-
         if (direction == BallDirection.CENTER_TO_RIGHT_TOP) {
             valueAnimator.reverse()
             return
@@ -565,6 +568,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return
         }
         valueAnimator.start()
+
     }
 
     /**

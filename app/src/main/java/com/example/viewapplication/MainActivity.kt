@@ -2,6 +2,7 @@ package com.example.viewapplication
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.example.viewapplication.databinding.ActivityMainBinding
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
@@ -41,6 +42,9 @@ class MainActivity : AppCompatActivity() {
                 startRightBottomBallAnimator(EsPathView.BallDirection.RIGHT_BOTTOM_TO_CENTER)
             }
         }
+
+        val recyclerView = RecyclerView(this)
+//        recyclerView.sc
 
 
     }
