@@ -1,6 +1,9 @@
 package com.example.viewapplication
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.viewapplication.databinding.ActivityMainBinding
@@ -33,18 +36,37 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        //路径动画
-        binding.path.viewTreeObserver.addOnGlobalLayoutListener {
-            binding.path.apply {
-                startLeftTopBallAnimator(EsPathView.BallDirection.LEFT_TOP_TO_CENTER)
-                startRightTopBallAnimator(EsPathView.BallDirection.RIGHT_TOP_TO_CENTER)
-                startLeftBottomBallAnimator(EsPathView.BallDirection.LEFT_BOTTOM_TO_CENTER)
-                startRightBottomBallAnimator(EsPathView.BallDirection.RIGHT_BOTTOM_TO_CENTER)
+
+        binding.apply {
+            esPath.setOnClickListener {
+                startActivity(Intent(this@MainActivity, EsPathActivity::class.java))
+            }
+            acCouplePath.setOnClickListener {
+                startActivity(Intent(this@MainActivity, AcCoupleEsAnimationActivity::class.java))
             }
         }
 
-        val recyclerView = RecyclerView(this)
-//        recyclerView.sc
+
+//        binding.seekBar.isEnabled = false
+//        binding.seekBar.apply {
+//            viewTreeObserver.addOnGlobalLayoutListener {
+//                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+//                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+////                        binding.image.translationX = (progress / 100f) * (width - thumbOffset)
+//                        binding.image.translationX = (progress / 100f) * (250.dp)
+//                    }
+//
+//                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+//                        binding.image.translationX = 0f
+//                    }
+//
+//                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+//                        binding.image.translationX = 0f
+//                        seekBar?.progress = 0
+//                    }
+//                })
+//            }
+//        }
 
 
     }

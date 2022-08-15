@@ -59,7 +59,6 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         strokeWidth = PATH_STROKE_WIDTH
     }
 
-//    private val
 
     /* -------------- 左上 ----------------*/
     private val leftTopPath by lazy(::Path)

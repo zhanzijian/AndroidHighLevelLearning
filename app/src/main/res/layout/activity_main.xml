@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        app:divider="@drawable/shape_divider"
+        app:showDividers="middle"
+        app:dividerPadding="5dp"
+
+        android:gravity="center">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/esPath"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="储能动图" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/acCouplePath"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AcCouple动图" />
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <!--<TextView
         android:id="@+id/show"
@@ -22,130 +48,38 @@
         android:layout_height="wrap_content"
         android:visibility="gone"/>-->
 
-    <com.example.viewapplication.view.EsPathView
-        android:id="@+id/path"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
 
     <!--<Button
         android:text="停止动画"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/stop"/>-->
-
-    <!--<LinearLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
+    <!--<androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/icon_power" />
+            android:id="@+id/image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/icon_power"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/gray_66_color"
-            android:textSize="12sp"
-            tools:text="362.00kw" />
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="20dp"
+            android:splitTrack="false"
+            android:thumb="@drawable/icon_progress"
+            android:thumbOffset="15dp"
+            android:progressDrawable="@drawable/shape_progress_background"
+            />
 
-    </LinearLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>-->
 
-    <LinearLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:layout_gravity="end"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/icon_psum" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/gray_66_color"
-            android:textSize="12sp"
-            tools:text="362.00kw" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:layout_gravity="end"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/icon_psum" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/gray_66_color"
-            android:textSize="12sp"
-            tools:text="362.00kw" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:layout_gravity="bottom"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/icon_battery_work" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/gray_66_color"
-            android:textSize="12sp"
-            tools:text="362.00kw" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:layout_gravity="end|bottom"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/icon_family_load_power" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/gray_66_color"
-            android:textSize="12sp"
-            tools:text="362.00kw" />
-
-    </LinearLayout>-->
-
-</FrameLayout>
+</ScrollView>
