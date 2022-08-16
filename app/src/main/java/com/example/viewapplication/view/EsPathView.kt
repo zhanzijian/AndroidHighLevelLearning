@@ -265,7 +265,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
         val pos0 = leftTopPos[0]
         val pos1 = leftTopPos[1]
-        val ballCenterX = maxOf(pos0,ballStartX)
+        val ballCenterX = maxOf(pos0, ballStartX)
         Log.d(TAG, "使用时leftTopPos[0]：${leftTopPos[0]},leftTopPos[1]:${leftTopPos[1]}")
         ballPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
         canvas.drawCircle(

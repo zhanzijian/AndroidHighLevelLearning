@@ -10,11 +10,12 @@
         <entry key="app/src/main/res/drawable/shape_divider.xml" value="0.178" />
         <entry key="app/src/main/res/drawable/shape_element_circle.xml" value="0.178" />
         <entry key="app/src/main/res/drawable/shape_progress_background.xml" value="0.1405" />
-        <entry key="app/src/main/res/layout/activity_ac_couple_es_animation.xml" value="0.2814814814814815" />
+        <entry key="app/src/main/res/layout/activity_ac_couple_es_animation.xml" value="0.45" />
         <entry key="app/src/main/res/layout/activity_annotation_processor.xml" value="0.2111111111111111" />
         <entry key="app/src/main/res/layout/activity_es_path.xml" value="0.2814814814814815" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.335" />
         <entry key="app/src/main/res/layout/activity_plugin.xml" value="0.2388888888888889" />
+        <entry key="app/src/main/res/layout/layout_ac_circle_element.xml" value="0.5" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1405" />
         <entry key="plugin/src/main/res/layout/activity_main.xml" value="0.24444444444444444" />
         <entry key="plugin/src/main/res/layout/activity_main_plugin.xml" value="0.24444444444444444" />

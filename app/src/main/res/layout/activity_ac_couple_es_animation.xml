@@ -6,70 +6,215 @@
     android:layout_height="match_parent"
     tools:context=".AcCoupleEsAnimationActivity">
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始动画"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="取消动画"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/start" />
+
     <com.example.viewapplication.view.AcCoupleEsPathView
         android:id="@+id/acCouplePath"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/purple_80_ae69b5_color"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!--<View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@drawable/shape_element_circle"
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/pv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
         app:layout_constraintStart_toStartOf="@id/acCouplePath"
-        app:layout_constraintTop_toTopOf="@id/acCouplePath"/>-->
+        app:layout_constraintTop_toTopOf="@id/acCouplePath"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
 
-    <View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
+
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
+        app:layout_constraintTop_toTopOf="@id/acCouplePath"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="电网"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/grid"
+        app:layout_constraintStart_toStartOf="@id/grid"
+        app:layout_constraintTop_toBottomOf="@id/grid" />
+
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/gridLoad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
         app:layout_constraintBottom_toBottomOf="@id/acCouplePath"
-        app:layout_constraintStart_toStartOf="@id/acCouplePath"/>
+        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
+        app:layout_constraintTop_toTopOf="@id/acCouplePath"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
 
-    <View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
-        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
-        app:layout_constraintTop_toTopOf="@id/acCouplePath"/>
-    <View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
-        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
-        app:layout_constraintBottom_toBottomOf="@id/acCouplePath"/>
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="电网负载"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/gridLoad"
+        app:layout_constraintStart_toStartOf="@id/gridLoad"
+        app:layout_constraintTop_toBottomOf="@id/gridLoad" />
 
-    <View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
-        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/inverter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
         app:layout_constraintBottom_toBottomOf="@id/acCouplePath"
-        app:layout_constraintTop_toTopOf="@id/acCouplePath"/>
-
-    <View
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
         app:layout_constraintStart_toStartOf="@id/acCouplePath"
-        app:layout_constraintBottom_toBottomOf="@id/acCouplePath"
-        app:layout_constraintTop_toTopOf="@id/acCouplePath"/>
-    <View
+        app:layout_constraintTop_toTopOf="@id/acCouplePath"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="逆变器"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/inverter"
+        app:layout_constraintStart_toStartOf="@id/inverter"
+        app:layout_constraintTop_toBottomOf="@id/inverter" />
+
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/acCouple"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shape_element_circle"
-        app:layout_constraintStart_toStartOf="@id/acCouplePath"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
         app:layout_constraintBottom_toBottomOf="@id/acCouplePath"
-        app:layout_constraintEnd_toEndOf="@id/acCouplePath"/>
+        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
+        app:layout_constraintStart_toStartOf="@id/acCouplePath"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="AC Couple"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/acCouple"
+        app:layout_constraintStart_toStartOf="@id/acCouple"
+        app:layout_constraintTop_toBottomOf="@id/acCouple" />
+
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/backUpLoad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="@id/acCouplePath"
+        app:layout_constraintTop_toTopOf="@id/acCouple"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="Back-Up负载"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/backUpLoad"
+        app:layout_constraintStart_toStartOf="@id/backUpLoad"
+        app:layout_constraintTop_toBottomOf="@id/backUpLoad" />
+
+    <com.example.viewapplication.view.AcCircleElement
+        android:id="@+id/battery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:acIcon="@mipmap/icon_power"
+        app:acPowerText="10.00kW"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
+        app:layout_constraintStart_toStartOf="@id/acCouplePath"
+        app:layout_constraintTop_toTopOf="@id/acCouple"
+        app:rippleColor="@color/gray_cc_color"
+        app:strokeColor="@color/gray_cc_color"
+        app:strokeWidth="1dp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:maxWidth="120dp"
+        android:text="电池"
+        android:textColor="@color/gray_33_color"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/battery"
+        app:layout_constraintStart_toStartOf="@id/battery"
+        app:layout_constraintTop_toBottomOf="@id/battery" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
