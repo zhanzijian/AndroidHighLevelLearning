@@ -14,15 +14,16 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.start.setOnClickListener {
+//            binding.acCouplePath.isOffline = true
             binding.acCouplePath.startArrowAnimations(
                 AcCoupleEsPathView.ArrowDirection.PV_TO_INVERTER,
                 AcCoupleEsPathView.ArrowDirection.INVERTER_TO_CENTER,
-                AcCoupleEsPathView.ArrowDirection.CENTER_TO_TOP,
-                AcCoupleEsPathView.ArrowDirection.CENTER_TO_AC,
+                AcCoupleEsPathView.ArrowDirection.AC_TO_CENTER,
                 AcCoupleEsPathView.ArrowDirection.CENTER_TO_GRID_LOAD,
-                AcCoupleEsPathView.ArrowDirection.BATTERY_TO_AC,
+                AcCoupleEsPathView.ArrowDirection.AC_TO_BATTERY,
                 AcCoupleEsPathView.ArrowDirection.AC_TO_BACK_UP_LOAD,
-                AcCoupleEsPathView.ArrowDirection.TOP_CENTER_TO_GRID
+                AcCoupleEsPathView.ArrowDirection.TOP_TO_CENTER,
+                AcCoupleEsPathView.ArrowDirection.GRID_TO_TOP_CENTER
             )
 //            binding.acCouplePath.startPvToInverterAnimation()
 //            binding.acCouplePath.startInverterToCenterAnimation()
