@@ -30,6 +30,14 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
 //            binding.acCouplePath.startCenterToTopAnimation()
 //            binding.acCouplePath.startCenterToAcAnimation()
         }
+        binding.start1.setOnClickListener {
+            binding.acCouplePath.startArrowAnimations(
+                AcCoupleEsPathView.ArrowDirection.PV_TO_INVERTER,
+                AcCoupleEsPathView.ArrowDirection.INVERTER_TO_CENTER,
+                AcCoupleEsPathView.ArrowDirection.AC_TO_CENTER,
+                AcCoupleEsPathView.ArrowDirection.CENTER_TO_GRID_LOAD,
+            )
+        }
         binding.cancel.setOnClickListener {
             binding.acCouplePath.endAllArrowAnimations()
 //            binding.acCouplePath.endPvToInverterAnimation()
@@ -39,7 +47,7 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
         }
 
         binding.cancelCenterToTop.setOnClickListener {
-            binding.acCouplePath.endArrowAnimation(AcCoupleEsPathView.ArrowDirection.CENTER_TO_TOP)
+            binding.acCouplePath.endArrowAnimation(AcCoupleEsPathView.ArrowDirection.PV_TO_INVERTER)
         }
     }
 }

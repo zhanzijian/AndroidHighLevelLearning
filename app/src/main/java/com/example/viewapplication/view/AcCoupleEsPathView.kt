@@ -1,18 +1,17 @@
 package com.example.viewapplication.view
 
-import android.animation.Animator
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.os.Build
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
 import android.view.animation.LinearInterpolator
-import androidx.core.util.isEmpty
+import androidx.core.util.*
 import com.example.viewapplication.R
 import com.example.viewapplication.dp
 import com.example.viewapplication.getColorById
@@ -129,11 +128,6 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
     private val arrowConcaveLength by lazy { (ARROW_WIDTH / 2f / tan(Math.toRadians((ARROW_CONCAVE_ANGLE / 2).toDouble()))).toFloat() }
 
     // ************************** 动画 *************************** //
-
-    /**
-     * 动画集合
-     */
-    private val animatorSet by lazy { AnimatorSet() }
 
     /**
      * PV-逆变器 Y 方向移动距离
@@ -257,6 +251,11 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      */
     private val animatorArray = SparseArray<ObjectAnimator>()
 
+    /**
+     * 正在进行的动画集合
+     */
+    private val runningAnimatorArray = SparseArray<ObjectAnimator>()
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         // 一些基础变量初始化
         dx = VIEW_WIDTH / 2f
@@ -267,8 +266,8 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
 
     private fun isAnimating(arrowDirection: ArrowDirection): Boolean {
         if (isOffline) return false
-        val animator = getAnimatorByDirectionFromMap(arrowDirection) ?: return false
-        return animator.isStarted || animator.isRunning
+        if (runningAnimatorArray.isEmpty()) return false
+        return runningAnimatorArray.containsKey(arrowDirection.ordinal)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -639,12 +638,82 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             val newAnimator =
                 ObjectAnimator.ofFloat(this, propertyName, startFloat, animatorLength)
                     .animatorConfig()
-            animatorArray.put(arrowDirection.ordinal, newAnimator)
+            animatorArray[arrowDirection.ordinal] = newAnimator
             return newAnimator
         }
         // 动画已经初始化过了，更新下动画起点和终点
         animator.setFloatValues(startFloat, animatorLength)
         return animator
+    }
+
+    private fun saveRunningAnimator(arrowDirection: ArrowDirection, objectAnimator: ObjectAnimator) {
+        if (runningAnimatorArray.isEmpty()) {
+            runningAnimatorArray[arrowDirection.ordinal] = objectAnimator
+            return
+        }
+        val animator = runningAnimatorArray.get(arrowDirection.ordinal)
+        if (animator == null) {
+            runningAnimatorArray[arrowDirection.ordinal] = objectAnimator
+        }
+    }
+
+    /**
+     * Start arrow animation
+     * 启动单独箭头动画
+     * @param arrowDirection
+     */
+    private fun startArrowAnimation(arrowDirection: ArrowDirection) {
+        if (isOffline) return
+        // 已经启动过了，不需要再启动
+        if (runningAnimatorArray.containsKey(arrowDirection.ordinal)) {
+            return
+        }
+        val animatorByDirection = getAnimatorByDirectionIfNullCreateOne(arrowDirection)
+        saveRunningAnimator(arrowDirection, animatorByDirection)
+        if (animatorByDirection.isStarted) {
+            return
+        }
+        animatorByDirection.start()
+    }
+
+    /**
+     * Start arrow animations
+     * 开启一些箭头动画
+     * @param arrowDirections
+     */
+    private fun startArrowAnimations(arrowDirections: List<ArrowDirection>) {
+        if (arrowDirections.isEmpty()) return
+        if (isOffline) return
+        // 移除多余的动画
+        if (runningAnimatorArray.isNotEmpty()) {
+            val valueIterator = runningAnimatorArray.valueIterator()
+            valueIterator.forEach {
+                val index = runningAnimatorArray.indexOfValue(it)
+                val key = runningAnimatorArray.keyAt(index)
+                var containsKey = false
+                for (arrowDirection in arrowDirections) {
+                    val ordinal = arrowDirection.ordinal
+                    if (key == ordinal) {
+                        containsKey = true
+                        break
+                    }
+                }
+                if (containsKey) {
+                    return@forEach
+                }
+                // 新动画集合中不包含该动画，需要结束动画并且移出集合
+                it.end()
+                runningAnimatorArray.removeAt(index)
+            }
+        }
+        arrowDirections.forEach {
+            val animatorByDirection = getAnimatorByDirectionIfNullCreateOne(it)
+            saveRunningAnimator(it, animatorByDirection)
+            if (animatorByDirection.isStarted) {
+                return@forEach
+            }
+            animatorByDirection.start()
+        }
     }
 
     /**
@@ -653,15 +722,7 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirections
      */
     fun startArrowAnimations(vararg arrowDirections: ArrowDirection) {
-        if (arrowDirections.isEmpty()) return
-        if (isOffline) return
-        val animatorList = mutableListOf<Animator>()
-        arrowDirections.forEach {
-            val animatorByDirection = getAnimatorByDirectionIfNullCreateOne(it)
-            animatorList.add(animatorByDirection)
-        }
-        animatorSet.playTogether(animatorList)
-        animatorSet.start()
+        startArrowAnimations(arrowDirections.toList())
     }
 
     /**
@@ -670,9 +731,12 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirection
      */
     fun endArrowAnimation(arrowDirection: ArrowDirection) {
-        val animator = animatorArray.get(arrowDirection.ordinal)
-        animator ?: return
+        if (runningAnimatorArray.isEmpty()) {
+            return
+        }
+        val animator = runningAnimatorArray.get(arrowDirection.ordinal) ?: return
         animator.end()
+        runningAnimatorArray.remove(arrowDirection.ordinal)
     }
 
     /**
@@ -681,11 +745,12 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirections
      */
     fun endArrowAnimations(vararg arrowDirections: ArrowDirection) {
-        if (arrowDirections.isEmpty()) {
-            return
-        }
+        if (arrowDirections.isEmpty() || runningAnimatorArray.isEmpty()) return
+        // 停止动画并从正在进行的动画集合中移除
         arrowDirections.forEach {
-            endArrowAnimation(it)
+            val animator = runningAnimatorArray.get(it.ordinal)
+            animator.end()
+            runningAnimatorArray.removeAt(runningAnimatorArray.indexOfValue(animator))
         }
     }
 
@@ -693,7 +758,13 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * End all arrow animations
      * 取消所有箭头动画
      */
-    fun endAllArrowAnimations() = animatorSet.end()
+    fun endAllArrowAnimations() {
+        if (runningAnimatorArray.isEmpty()) return
+        runningAnimatorArray.forEach { _, anim ->
+            anim.end()
+        }
+        runningAnimatorArray.clear()
+    }
 
     /**
      * 动画基础配置
