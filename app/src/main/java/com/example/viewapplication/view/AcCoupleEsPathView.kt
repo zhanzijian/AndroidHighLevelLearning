@@ -8,12 +8,15 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.util.*
 import com.example.viewapplication.R
+import com.example.viewapplication.config.AcConfiguration
 import com.example.viewapplication.dp
+import com.example.viewapplication.enumeration.ArrowDirection
 import com.example.viewapplication.getColorById
 import kotlin.math.tan
 
@@ -31,20 +34,38 @@ import kotlin.math.tan
  * @author zijian.zhan
  * @date 2022/08/12 11:05
  */
+private const val TAG = "AcCoupleEsPathView"
+class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+    /**
+     * 自定义的一些基础配置
+     */
+    private val acConfiguration: AcConfiguration = AcConfiguration.get(context)
 
-private val PATH_STROKE_WIDTH = 2f.dp
-private val CENTER_CIRCLE_RADIUS = 5f.dp // 中心圆半径
-private val ELEMENT_CIRCLE_RADIUS = 32f.dp // 组件圆半径
+    private val mElementCircleRadius: Float = acConfiguration.elementCircleRadius // 组件圆半径
+    private val mCenterCircleRadius: Float = acConfiguration.centerCircleRadius // 中心圆半径
+    private val mViewWidth: Float = acConfiguration.viewWidth // view 宽度
+    private val mViewHeight: Float = acConfiguration.fullElementHeight // view 高度
 
-private val ARROW_WIDTH = 8f.dp // 箭头宽度
-private val ARROW_HEIGHT = 8f.dp // 箭头高度
-private const val ARROW_CONCAVE_ANGLE = 90f // 箭头内凹角
-private val VIEW_WIDTH = 260f.dp // view 宽度
-private val VIEW_HEIGHT = 210f.dp // view 高度
-private const val ANIMATION_START_DELAY = 2000L // 动画启动延时
-private const val ANIMATION_DURATION = 2000L // 动画运行时长
+    private val mArrowConcaveLength: Float = acConfiguration.arrowConcaveLength // 箭头内凹长度
+    private val mArrowWidth: Float = acConfiguration.arrowWidth // 箭头宽度
+    private val mArrowHeight: Float = acConfiguration.arrowHeight // 箭头高度
 
-class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+    private lateinit var pvInverterPaint: Paint
+    private lateinit var batteryAcPaint: Paint
+    private lateinit var inverterCenterPaint: Paint
+    private lateinit var topCenterPaint: Paint
+    private lateinit var gridLoadPaint: Paint
+    private lateinit var centerAcPaint: Paint
+    private lateinit var acBackupLoadPaint: Paint
+    private lateinit var gridPaint: Paint
+    private lateinit var mCirclePaint: Paint
+    private lateinit var mOfflinePaint: Paint
+    private lateinit var mBlueArrowPaint: Paint
+    private lateinit var mGreenArrowPaint: Paint
+
+
+    private val mAnimationDuration = acConfiguration.animationDuration
+
     /**
      * 线在X轴上的间距
      */
@@ -65,49 +86,6 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      */
     private var centerY = 0f
 
-    // ************* paint ************** //
-    private val blueLinePaint by lazy {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = PATH_STROKE_WIDTH
-            color = getColorById(context, R.color.blue_5f91cb_color)
-        }
-    }
-    private val greenLinePaint by lazy {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = PATH_STROKE_WIDTH
-            color = getColorById(context, R.color.green_aed681_color)
-        }
-    }
-
-    private val circlePaint by lazy {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = getColorById(context, R.color.green_aed681_color)
-        }
-    }
-
-    private val blueArrowPaint by lazy {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL_AND_STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 2f.dp
-            color = getColorById(context, R.color.blue_5f91cb_color)
-        }
-    }
-
-    private val greenArrowPaint by lazy {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL_AND_STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 2f.dp
-            color = getColorById(context, R.color.green_aed681_color)
-        }
-    }
-
     // ************* 箭头路径 ************** //
     private val pvToInverterArrowPath by lazy(::Path)
     private val inverterToCenterArrowPath by lazy(::Path)
@@ -121,11 +99,6 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
     private val acToBackupArrowPath by lazy(::Path)
     private val topCenterToGridArrowPath by lazy(::Path)
     private val gridToTopCenterArrowPath by lazy(::Path)
-
-    /**
-     * 箭头内凹长度
-     */
-    private val arrowConcaveLength by lazy { (ARROW_WIDTH / 2f / tan(Math.toRadians((ARROW_CONCAVE_ANGLE / 2).toDouble()))).toFloat() }
 
     // ************************** 动画 *************************** //
 
@@ -238,9 +211,45 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         }
 
     /**
-     * 是否离线
+     * 电站是否离线
      */
-    var isOffline = false
+    var isStationOffline = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**
+     * 所有的 AC 是否离线
+     */
+    var isAllAcOffline = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**
+     * 主模块的单个 AC 是否离线
+     */
+    var isSingleAcOffline = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**
+     * 电池 是否离线
+     */
+    var isBatteryOffline = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**
+     * 逆变器是否离线
+     */
+    var isInverterOffline = false
         set(value) {
             field = value
             invalidate()
@@ -256,107 +265,190 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      */
     private val runningAnimatorArray = SparseArray<ObjectAnimator>()
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        // 一些基础变量初始化
-        dx = VIEW_WIDTH / 2f
-        dy = VIEW_HEIGHT / 2f
-        centerX = width / 2f
-        centerY = height / 2f
+    init {
+        initPaints()
     }
 
+    private fun initPaints() {
+        pvInverterPaint = acConfiguration.blueLinePaint
+        batteryAcPaint = acConfiguration.blueLinePaint
+        inverterCenterPaint = acConfiguration.greenLinePaint
+        topCenterPaint = acConfiguration.greenLinePaint
+        gridLoadPaint = acConfiguration.greenLinePaint
+        centerAcPaint = acConfiguration.greenLinePaint
+        acBackupLoadPaint = acConfiguration.greenLinePaint
+        gridPaint = acConfiguration.greenLinePaint
+        mCirclePaint = acConfiguration.circlePaint
+        mOfflinePaint = acConfiguration.offlinePaint
+        mBlueArrowPaint = acConfiguration.blueArrowPaint
+        mGreenArrowPaint = acConfiguration.greenArrowPaint
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        // 一些基础变量初始化
+        dx = mViewWidth / 2f
+        dy = mViewHeight / 2f
+        centerX = width / 2f
+        centerY = height / 2f
+        Log.d(TAG, "onSizeChanged: dx:$dx  dy:$dy centerX:$centerX centerY:$centerY")
+    }
+
+    /**
+     * 动画已经启动
+     *
+     * @param arrowDirection
+     * @return
+     */
     private fun isAnimating(arrowDirection: ArrowDirection): Boolean {
-        if (isOffline) return false
         if (runningAnimatorArray.isEmpty()) return false
         return runningAnimatorArray.containsKey(arrowDirection.ordinal)
     }
 
     override fun onDraw(canvas: Canvas) {
 
-        handleOffline()
-
+        val inverterOffline = isStationOffline || isInverterOffline
         // PV -> 逆变器
-        canvas.drawLine(centerX - dx, centerY - dy, centerX - dx, centerY, blueLinePaint)
-        if (isAnimating(ArrowDirection.PV_TO_INVERTER)) {
+        canvas.drawLine(
+            centerX - dx,
+            centerY - dy,
+            centerX - dx,
+            centerY,
+            if (inverterOffline) mOfflinePaint else pvInverterPaint
+        )
+        if (inverterOffline) {
+            endArrowAnimation(ArrowDirection.PV_TO_INVERTER)
+        } else if (isAnimating(ArrowDirection.PV_TO_INVERTER)) {
             initPvToInverterArrowPath()
-            canvas.drawPath(pvToInverterArrowPath, blueArrowPaint)
+            canvas.drawPath(pvToInverterArrowPath, mBlueArrowPaint)
         }
+        // 逆变器 -> 中心
+        canvas.drawLine(
+            centerX - dx,
+            centerY,
+            centerX,
+            centerY,
+            if (inverterOffline) mOfflinePaint else inverterCenterPaint
+        )
+        if (inverterOffline) {
+            endArrowAnimation(ArrowDirection.INVERTER_TO_CENTER)
+        } else if (isAnimating(ArrowDirection.INVERTER_TO_CENTER)) {
+            initInverterToCenterArrowPath()
+            canvas.drawPath(inverterToCenterArrowPath, mGreenArrowPaint)
+        }
+
+        val batteryOffline = isStationOffline || isBatteryOffline
         // 电池 <-> Ac Couple
-        canvas.drawLine(centerX - dx, centerY + dy, centerX, centerY + dy, blueLinePaint)
-        if (isAnimating(ArrowDirection.BATTERY_TO_AC)) {
+        canvas.drawLine(
+            centerX - dx,
+            centerY + dy,
+            centerX,
+            centerY + dy,
+            if (batteryOffline) mOfflinePaint else batteryAcPaint
+        )
+        if (batteryOffline) {
+            endArrowAnimations(ArrowDirection.BATTERY_TO_AC, ArrowDirection.AC_TO_BATTERY)
+        } else if (isAnimating(ArrowDirection.BATTERY_TO_AC)) {
             initBatteryToAcArrowPath()
-            canvas.drawPath(batteryToAcArrowPath, blueArrowPaint)
+            canvas.drawPath(batteryToAcArrowPath, mBlueArrowPaint)
         } else if (isAnimating(ArrowDirection.AC_TO_BATTERY)) {
             initAcToBatteryArrowPath()
-            canvas.drawPath(acToBatteryArrowPath, blueArrowPaint)
+            canvas.drawPath(acToBatteryArrowPath, mBlueArrowPaint)
         }
 
-        // 逆变器 -> 中心
-        canvas.drawLine(centerX - dx, centerY, centerX, centerY, greenLinePaint)
-        if (isAnimating(ArrowDirection.INVERTER_TO_CENTER)) {
-            initInverterToCenterArrowPath()
-            canvas.drawPath(inverterToCenterArrowPath, greenArrowPaint)
-        }
-
+        // 所有 AC 离线，则电网和电网负载侧均离线
+        val allAcOffline = isStationOffline || isAllAcOffline
         // 中心 <-> 顶部
-        canvas.drawLine(centerX, centerY, centerX, centerY - dy, greenLinePaint)
-        if (isAnimating(ArrowDirection.CENTER_TO_TOP)) {
+        canvas.drawLine(
+            centerX,
+            centerY,
+            centerX,
+            centerY - dy,
+            if (allAcOffline) mOfflinePaint else topCenterPaint
+        )
+        if (allAcOffline) {
+            endArrowAnimations(ArrowDirection.CENTER_TO_TOP, ArrowDirection.TOP_TO_CENTER)
+        } else if (isAnimating(ArrowDirection.CENTER_TO_TOP)) {
             initCenterToTopArrowPath()
-            canvas.drawPath(centerToTopArrowPath, greenArrowPaint)
+            canvas.drawPath(centerToTopArrowPath, mGreenArrowPaint)
         } else if (isAnimating(ArrowDirection.TOP_TO_CENTER)) {
             initTopToCenterArrowPath()
-            canvas.drawPath(topToCenterArrowPath, greenArrowPaint)
+            canvas.drawPath(topToCenterArrowPath, mGreenArrowPaint)
         }
-
-        // 中心 -> 电网负载
-        canvas.drawLine(centerX, centerY, centerX + dx, centerY, greenLinePaint)
-        if (isAnimating(ArrowDirection.CENTER_TO_GRID_LOAD)) {
-            initCenterToGridLoadArrowPath()
-            canvas.drawPath(centerToGridLoadArrowPath, greenArrowPaint)
-        }
-
-        // 中心 <-> Ac Couple
-        canvas.drawLine(centerX, centerY, centerX, centerY + dy, greenLinePaint)
-        if (isAnimating(ArrowDirection.CENTER_TO_AC)) {
-            initCenterToAcArrowPath()
-            canvas.drawPath(centerToAcArrowPath, greenArrowPaint)
-        } else if (isAnimating(ArrowDirection.AC_TO_CENTER)) {
-            initAcToCenterArrowPath()
-            canvas.drawPath(acToCenterArrowPath, greenArrowPaint)
-        }
-
-
-        // Ac Couple -> backup 负载
-        canvas.drawLine(centerX, centerY + dy, centerX + dx, centerY + dy, greenLinePaint)
-        if (isAnimating(ArrowDirection.AC_TO_BACK_UP_LOAD)) {
-            initAcToBackupArrowPath()
-            canvas.drawPath(acToBackupArrowPath, greenArrowPaint)
-        }
-
         // 中心顶部 <-> 电网
-        canvas.drawLine(centerX, centerY - dy, centerX + dx, centerY - dy, greenLinePaint)
-        if (isAnimating(ArrowDirection.TOP_CENTER_TO_GRID)) {
+        canvas.drawLine(
+            centerX,
+            centerY - dy,
+            centerX + dx,
+            centerY - dy,
+            if (allAcOffline) mOfflinePaint else gridPaint
+        )
+        if (allAcOffline) {
+            endArrowAnimations(ArrowDirection.TOP_CENTER_TO_GRID, ArrowDirection.GRID_TO_TOP_CENTER)
+        } else if (isAnimating(ArrowDirection.TOP_CENTER_TO_GRID)) {
             initTopCenterToGridArrowPath()
-            canvas.drawPath(topCenterToGridArrowPath, greenArrowPaint)
+            canvas.drawPath(topCenterToGridArrowPath, mGreenArrowPaint)
         } else if (isAnimating(ArrowDirection.GRID_TO_TOP_CENTER)) {
             initGridToTopCenterArrowPath()
-            canvas.drawPath(gridToTopCenterArrowPath, greenArrowPaint)
+            canvas.drawPath(gridToTopCenterArrowPath, mGreenArrowPaint)
         }
-
+        // 中心 -> 电网负载
+        canvas.drawLine(
+            centerX,
+            centerY,
+            centerX + dx,
+            centerY,
+            if (allAcOffline) mOfflinePaint else gridLoadPaint
+        )
+        if (allAcOffline) {
+            endArrowAnimation(ArrowDirection.CENTER_TO_GRID_LOAD)
+        } else if (isAnimating(ArrowDirection.CENTER_TO_GRID_LOAD)) {
+            initCenterToGridLoadArrowPath()
+            canvas.drawPath(centerToGridLoadArrowPath, mGreenArrowPaint)
+        }
+        // 中心 <-> Ac Couple
+        canvas.drawLine(
+            centerX,
+            centerY,
+            centerX,
+            centerY + dy,
+            if (allAcOffline) mOfflinePaint else centerAcPaint
+        )
+        if (allAcOffline) {
+            endArrowAnimations(ArrowDirection.CENTER_TO_AC, ArrowDirection.AC_TO_CENTER)
+        } else if (isAnimating(ArrowDirection.CENTER_TO_AC)) {
+            initCenterToAcArrowPath()
+            canvas.drawPath(centerToAcArrowPath, mGreenArrowPaint)
+        } else if (isAnimating(ArrowDirection.AC_TO_CENTER)) {
+            initAcToCenterArrowPath()
+            canvas.drawPath(acToCenterArrowPath, mGreenArrowPaint)
+        }
         // 中心原点
-        canvas.drawCircle(centerX, centerY, CENTER_CIRCLE_RADIUS, circlePaint)
+        mCirclePaint.color = if (allAcOffline) acConfiguration.grayColor else acConfiguration.greenColor
+        canvas.drawCircle(
+            centerX,
+            centerY,
+            mCenterCircleRadius,
+            mCirclePaint
+        )
+
+        val singleAcOffline = isStationOffline || isSingleAcOffline
+        // Ac Couple -> backup 负载
+        canvas.drawLine(
+            centerX,
+            centerY + dy,
+            centerX + dx,
+            centerY + dy,
+            if (singleAcOffline) mOfflinePaint else acBackupLoadPaint
+        )
+        if (singleAcOffline) {
+            endArrowAnimation(ArrowDirection.AC_TO_BACK_UP_LOAD)
+        } else if (isAnimating(ArrowDirection.AC_TO_BACK_UP_LOAD)) {
+            initAcToBackupArrowPath()
+            canvas.drawPath(acToBackupArrowPath, mGreenArrowPaint)
+        }
+
     }
 
-    /**
-     * 处理离线情况
-     */
-    private fun handleOffline() {
-        if (!isOffline) return
-        val paintList =
-            arrayListOf(blueLinePaint, blueArrowPaint, greenLinePaint, greenLinePaint, circlePaint)
-        paintList.forEach {
-            it.color = getColorById(context, R.color.gray_cc_color)
-        }
-    }
 
     /**
      * 初始化 pv-逆变器 箭头的path
@@ -367,11 +459,17 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         }
         pvToInverterArrowPath.moveTo(
             centerX - dx,
-            centerY - dy + ELEMENT_CIRCLE_RADIUS + arrowConcaveLength + pvToInverterDy
+            centerY - dy + mElementCircleRadius + mArrowConcaveLength + pvToInverterDy
         )
-        pvToInverterArrowPath.rLineTo(ARROW_WIDTH / 2f, -arrowConcaveLength)
-        pvToInverterArrowPath.rLineTo(-ARROW_WIDTH / 2f, ARROW_HEIGHT)
-        pvToInverterArrowPath.rLineTo(-ARROW_WIDTH / 2f, -ARROW_HEIGHT)
+        pvToInverterArrowPath.rLineTo(
+            mArrowWidth / 2f,
+            -mArrowConcaveLength
+        )
+        pvToInverterArrowPath.rLineTo(-mArrowWidth / 2f, mArrowHeight)
+        pvToInverterArrowPath.rLineTo(
+            -mArrowWidth / 2f,
+            -mArrowHeight
+        )
         pvToInverterArrowPath.close()
     }
 
@@ -382,14 +480,16 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         if (!inverterToCenterArrowPath.isEmpty) {
             inverterToCenterArrowPath.reset()
         }
-        inverterToCenterArrowPath.moveTo(
-            centerX - dx + ELEMENT_CIRCLE_RADIUS + arrowConcaveLength + inverterToCenterDx,
-            centerY
-        )
-        inverterToCenterArrowPath.rLineTo(-arrowConcaveLength, -ARROW_WIDTH / 2f)
-        inverterToCenterArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        inverterToCenterArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        inverterToCenterArrowPath.close()
+        with(inverterToCenterArrowPath) {
+            moveTo(
+                centerX - dx + mElementCircleRadius + mArrowConcaveLength + inverterToCenterDx,
+                centerY
+            )
+            rLineTo(-mArrowConcaveLength, -mArrowWidth / 2f)
+            rLineTo(mArrowHeight, mArrowWidth / 2f)
+            rLineTo(-mArrowHeight, mArrowWidth / 2f)
+            close()
+        }
     }
 
     /**
@@ -401,11 +501,14 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         }
         centerToTopArrowPath.moveTo(
             centerX,
-            centerY - arrowConcaveLength - centerToTopDy
+            centerY - mArrowConcaveLength - centerToTopDy
         )
-        centerToTopArrowPath.rLineTo(-ARROW_WIDTH / 2f, arrowConcaveLength)
-        centerToTopArrowPath.rLineTo(ARROW_WIDTH / 2f, -ARROW_HEIGHT)
-        centerToTopArrowPath.rLineTo(ARROW_WIDTH / 2f, ARROW_HEIGHT)
+        centerToTopArrowPath.rLineTo(
+            -mArrowWidth / 2f,
+            mArrowConcaveLength
+        )
+        centerToTopArrowPath.rLineTo(mArrowWidth / 2f, -mArrowHeight)
+        centerToTopArrowPath.rLineTo(mArrowWidth / 2f, mArrowHeight)
         centerToTopArrowPath.close()
     }
 
@@ -420,9 +523,12 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             centerX,
             centerY - dy + topToCenterDy
         )
-        topToCenterArrowPath.rLineTo(ARROW_WIDTH / 2f, -arrowConcaveLength)
-        topToCenterArrowPath.rLineTo(-ARROW_WIDTH / 2f, ARROW_HEIGHT)
-        topToCenterArrowPath.rLineTo(-ARROW_WIDTH / 2f, -ARROW_HEIGHT)
+        topToCenterArrowPath.rLineTo(
+            mArrowWidth / 2f,
+            -mArrowConcaveLength
+        )
+        topToCenterArrowPath.rLineTo(-mArrowWidth / 2f, mArrowHeight)
+        topToCenterArrowPath.rLineTo(-mArrowWidth / 2f, -mArrowHeight)
         topToCenterArrowPath.close()
     }
 
@@ -435,11 +541,14 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         }
         centerToAcArrowPath.moveTo(
             centerX,
-            centerY + arrowConcaveLength + centerToAcDy
+            centerY + mArrowConcaveLength + centerToAcDy
         )
-        centerToAcArrowPath.rLineTo(-ARROW_WIDTH / 2f, -arrowConcaveLength)
-        centerToAcArrowPath.rLineTo(ARROW_WIDTH / 2f, ARROW_HEIGHT)
-        centerToAcArrowPath.rLineTo(ARROW_WIDTH / 2f, -ARROW_HEIGHT)
+        centerToAcArrowPath.rLineTo(
+            -mArrowWidth / 2f,
+            -mArrowConcaveLength
+        )
+        centerToAcArrowPath.rLineTo(mArrowWidth / 2f, mArrowHeight)
+        centerToAcArrowPath.rLineTo(mArrowWidth / 2f, -mArrowHeight)
         centerToAcArrowPath.close()
     }
 
@@ -452,11 +561,14 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         }
         acToCenterArrowPath.moveTo(
             centerX,
-            centerY + dy - ELEMENT_CIRCLE_RADIUS + arrowConcaveLength - acToCenterDy
+            centerY + dy - mElementCircleRadius + mArrowConcaveLength - acToCenterDy
         )
-        acToCenterArrowPath.rLineTo(-ARROW_WIDTH / 2f, arrowConcaveLength)
-        acToCenterArrowPath.rLineTo(ARROW_WIDTH / 2f, -ARROW_HEIGHT)
-        acToCenterArrowPath.rLineTo(ARROW_WIDTH / 2f, ARROW_HEIGHT)
+        acToCenterArrowPath.rLineTo(
+            -mArrowWidth / 2f,
+            mArrowConcaveLength
+        )
+        acToCenterArrowPath.rLineTo(mArrowWidth / 2f, -mArrowHeight)
+        acToCenterArrowPath.rLineTo(mArrowWidth / 2f, mArrowHeight)
         acToCenterArrowPath.close()
     }
 
@@ -468,12 +580,21 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             centerToGridLoadArrowPath.reset()
         }
         centerToGridLoadArrowPath.moveTo(
-            centerX + arrowConcaveLength + centerToGridLoadDx,
+            centerX + mArrowConcaveLength + centerToGridLoadDx,
             centerY
         )
-        centerToGridLoadArrowPath.rLineTo(-arrowConcaveLength, -ARROW_WIDTH / 2f)
-        centerToGridLoadArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        centerToGridLoadArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        centerToGridLoadArrowPath.rLineTo(
+            -mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        centerToGridLoadArrowPath.rLineTo(
+            mArrowHeight,
+            mArrowWidth / 2f
+        )
+        centerToGridLoadArrowPath.rLineTo(
+            -mArrowHeight,
+            mArrowWidth / 2f
+        )
         centerToGridLoadArrowPath.close()
     }
 
@@ -485,12 +606,15 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             batteryToAcArrowPath.reset()
         }
         batteryToAcArrowPath.moveTo(
-            centerX - dx + ELEMENT_CIRCLE_RADIUS - ARROW_HEIGHT + batteryToAcDx,
+            centerX - dx + mElementCircleRadius - mArrowHeight + batteryToAcDx,
             centerY + dy
         )
-        batteryToAcArrowPath.rLineTo(-arrowConcaveLength, -ARROW_WIDTH / 2f)
-        batteryToAcArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        batteryToAcArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        batteryToAcArrowPath.rLineTo(
+            -mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        batteryToAcArrowPath.rLineTo(mArrowHeight, mArrowWidth / 2f)
+        batteryToAcArrowPath.rLineTo(-mArrowHeight, mArrowWidth / 2f)
         batteryToAcArrowPath.close()
     }
 
@@ -502,12 +626,15 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             acToBatteryArrowPath.reset()
         }
         acToBatteryArrowPath.moveTo(
-            centerX - ELEMENT_CIRCLE_RADIUS + ARROW_HEIGHT - acToBatteryDx,
+            centerX - mElementCircleRadius + mArrowHeight - acToBatteryDx,
             centerY + dy
         )
-        acToBatteryArrowPath.rLineTo(arrowConcaveLength, -ARROW_WIDTH / 2f)
-        acToBatteryArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        acToBatteryArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        acToBatteryArrowPath.rLineTo(
+            mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        acToBatteryArrowPath.rLineTo(-mArrowHeight, mArrowWidth / 2f)
+        acToBatteryArrowPath.rLineTo(mArrowHeight, mArrowWidth / 2f)
         acToBatteryArrowPath.close()
     }
 
@@ -519,12 +646,15 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             acToBackupArrowPath.reset()
         }
         acToBackupArrowPath.moveTo(
-            centerX + ELEMENT_CIRCLE_RADIUS - ARROW_HEIGHT + acToBackupDx,
+            centerX + mElementCircleRadius - mArrowHeight + acToBackupDx,
             centerY + dy
         )
-        acToBackupArrowPath.rLineTo(-arrowConcaveLength, -ARROW_WIDTH / 2f)
-        acToBackupArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        acToBackupArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        acToBackupArrowPath.rLineTo(
+            -mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        acToBackupArrowPath.rLineTo(mArrowHeight, mArrowWidth / 2f)
+        acToBackupArrowPath.rLineTo(-mArrowHeight, mArrowWidth / 2f)
         acToBackupArrowPath.close()
     }
 
@@ -539,9 +669,18 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             centerX + topCenterToGridDx,
             centerY - dy
         )
-        topCenterToGridArrowPath.rLineTo(-arrowConcaveLength, -ARROW_WIDTH / 2f)
-        topCenterToGridArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        topCenterToGridArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        topCenterToGridArrowPath.rLineTo(
+            -mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        topCenterToGridArrowPath.rLineTo(
+            mArrowHeight,
+            mArrowWidth / 2f
+        )
+        topCenterToGridArrowPath.rLineTo(
+            -mArrowHeight,
+            mArrowWidth / 2f
+        )
         topCenterToGridArrowPath.close()
     }
 
@@ -553,16 +692,25 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             gridToTopCenterArrowPath.reset()
         }
         gridToTopCenterArrowPath.moveTo(
-            centerX + dx - ELEMENT_CIRCLE_RADIUS + ARROW_HEIGHT - gridToTopCenterDx,
+            centerX + dx - mElementCircleRadius + mArrowHeight - gridToTopCenterDx,
             centerY - dy
         )
-        gridToTopCenterArrowPath.rLineTo(arrowConcaveLength, -ARROW_WIDTH / 2f)
-        gridToTopCenterArrowPath.rLineTo(-ARROW_HEIGHT, ARROW_WIDTH / 2f)
-        gridToTopCenterArrowPath.rLineTo(ARROW_HEIGHT, ARROW_WIDTH / 2f)
+        gridToTopCenterArrowPath.rLineTo(
+            mArrowConcaveLength,
+            -mArrowWidth / 2f
+        )
+        gridToTopCenterArrowPath.rLineTo(
+            -mArrowHeight,
+            mArrowWidth / 2f
+        )
+        gridToTopCenterArrowPath.rLineTo(
+            mArrowHeight,
+            mArrowWidth / 2f
+        )
         gridToTopCenterArrowPath.close()
     }
 
-    // ---------------- 动画启动和取消区域开始 -------------------- //
+    // ----------- 动画启动和取消区域开始（注意，动画需要主动结束，如启动双向互斥动画中的一个，需先结束其互斥的动画） ------------ //
 
 
     /**
@@ -571,7 +719,7 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirection
      * @return
      */
-    private fun getAnimatorPropertyNameByDirection(arrowDirection: ArrowDirection): String {
+    private fun getAnimatorPropertyNameByDirection(arrowDirection: ArrowDirection): String? {
         return when (arrowDirection) {
             ArrowDirection.PV_TO_INVERTER -> "pvToInverterDy"
             ArrowDirection.INVERTER_TO_CENTER -> "inverterToCenterDx"
@@ -585,6 +733,7 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             ArrowDirection.AC_TO_BACK_UP_LOAD -> "acToBackupDx"
             ArrowDirection.TOP_CENTER_TO_GRID -> "topCenterToGridDx"
             ArrowDirection.GRID_TO_TOP_CENTER -> "gridToTopCenterDx"
+            else -> null
         }
     }
 
@@ -594,20 +743,20 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirection
      * @return
      */
-    private fun getAnimatorLengthByDirection(arrowDirection: ArrowDirection): Float {
+    private fun getAnimatorLengthByDirection(arrowDirection: ArrowDirection): Float? {
         return when (arrowDirection) {
-            ArrowDirection.PV_TO_INVERTER -> dy - ELEMENT_CIRCLE_RADIUS * 2
-            ArrowDirection.INVERTER_TO_CENTER -> dx - ELEMENT_CIRCLE_RADIUS - ARROW_HEIGHT
-            ArrowDirection.CENTER_TO_TOP -> dy - ARROW_HEIGHT
-            ArrowDirection.TOP_TO_CENTER -> dy - ARROW_HEIGHT
-            ArrowDirection.CENTER_TO_AC -> dy - ELEMENT_CIRCLE_RADIUS
-            ArrowDirection.AC_TO_CENTER -> dy - ELEMENT_CIRCLE_RADIUS
-            ArrowDirection.CENTER_TO_GRID_LOAD -> dx - ARROW_HEIGHT
-            ArrowDirection.BATTERY_TO_AC -> dx - ELEMENT_CIRCLE_RADIUS * 2 + ARROW_HEIGHT
-            ArrowDirection.AC_TO_BATTERY -> dx - ELEMENT_CIRCLE_RADIUS * 2 + ARROW_HEIGHT
-            ArrowDirection.AC_TO_BACK_UP_LOAD -> dx - ELEMENT_CIRCLE_RADIUS * 2 + ARROW_HEIGHT
-            ArrowDirection.TOP_CENTER_TO_GRID -> dx - ELEMENT_CIRCLE_RADIUS
-            ArrowDirection.GRID_TO_TOP_CENTER -> dx - ELEMENT_CIRCLE_RADIUS
+            ArrowDirection.PV_TO_INVERTER -> dy - mElementCircleRadius * 2
+            ArrowDirection.INVERTER_TO_CENTER -> dx - mElementCircleRadius - mArrowHeight
+            ArrowDirection.CENTER_TO_TOP -> dy - mArrowHeight
+            ArrowDirection.TOP_TO_CENTER -> dy - mArrowHeight
+            ArrowDirection.CENTER_TO_AC -> dy - mElementCircleRadius
+            ArrowDirection.AC_TO_CENTER -> dy - mElementCircleRadius
+            ArrowDirection.CENTER_TO_GRID_LOAD -> dx - mArrowHeight
+            ArrowDirection.BATTERY_TO_AC, ArrowDirection.AC_TO_BATTERY, ArrowDirection.AC_TO_BACK_UP_LOAD
+            -> dx - mElementCircleRadius * 2 + mArrowHeight
+            ArrowDirection.TOP_CENTER_TO_GRID -> dx - mElementCircleRadius
+            ArrowDirection.GRID_TO_TOP_CENTER -> dx - mElementCircleRadius
+            else -> null
         }
     }
 
@@ -628,17 +777,21 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * @param arrowDirection
      * @return
      */
-    private fun getAnimatorByDirectionIfNullCreateOne(arrowDirection: ArrowDirection): ObjectAnimator {
+    private fun getAnimatorByDirectionIfNullCreateOne(arrowDirection: ArrowDirection): ObjectAnimator? {
         val animator = getAnimatorByDirectionFromMap(arrowDirection)
         val startFloat = 0f
-        val animatorLength = getAnimatorLengthByDirection(arrowDirection)
+        val animatorLength = getAnimatorLengthByDirection(arrowDirection) ?: return null
         // 还没有保存过的动画
         if (animator == null) {
-            val propertyName = getAnimatorPropertyNameByDirection(arrowDirection)
+            val propertyName = getAnimatorPropertyNameByDirection(arrowDirection) ?: return null
+            Log.d(
+                TAG,
+                "getAnimatorByDirectionIfNullCreateOne: propertyName:$propertyName  animatorLength:$animatorLength"
+            )
             val newAnimator =
                 ObjectAnimator.ofFloat(this, propertyName, startFloat, animatorLength)
                     .animatorConfig()
-            animatorArray[arrowDirection.ordinal] = newAnimator
+            animatorArray.put(arrowDirection.ordinal, newAnimator)
             return newAnimator
         }
         // 动画已经初始化过了，更新下动画起点和终点
@@ -646,14 +799,17 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         return animator
     }
 
-    private fun saveRunningAnimator(arrowDirection: ArrowDirection, objectAnimator: ObjectAnimator) {
+    private fun saveRunningAnimator(
+        arrowDirection: ArrowDirection,
+        objectAnimator: ObjectAnimator
+    ) {
         if (runningAnimatorArray.isEmpty()) {
-            runningAnimatorArray[arrowDirection.ordinal] = objectAnimator
+            runningAnimatorArray.put(arrowDirection.ordinal, objectAnimator)
             return
         }
         val animator = runningAnimatorArray.get(arrowDirection.ordinal)
         if (animator == null) {
-            runningAnimatorArray[arrowDirection.ordinal] = objectAnimator
+            runningAnimatorArray.put(arrowDirection.ordinal, objectAnimator)
         }
     }
 
@@ -662,18 +818,8 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * 启动单独箭头动画
      * @param arrowDirection
      */
-    private fun startArrowAnimation(arrowDirection: ArrowDirection) {
-        if (isOffline) return
-        // 已经启动过了，不需要再启动
-        if (runningAnimatorArray.containsKey(arrowDirection.ordinal)) {
-            return
-        }
-        val animatorByDirection = getAnimatorByDirectionIfNullCreateOne(arrowDirection)
-        saveRunningAnimator(arrowDirection, animatorByDirection)
-        if (animatorByDirection.isStarted) {
-            return
-        }
-        animatorByDirection.start()
+    fun startArrowAnimation(arrowDirection: ArrowDirection) {
+        startArrowAnimations(arrowDirection)
     }
 
     /**
@@ -681,39 +827,25 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
      * 开启一些箭头动画
      * @param arrowDirections
      */
-    private fun startArrowAnimations(arrowDirections: List<ArrowDirection>) {
+    fun startArrowAnimations(arrowDirections: List<ArrowDirection>) {
         if (arrowDirections.isEmpty()) return
-        if (isOffline) return
-        // 移除多余的动画
-        if (runningAnimatorArray.isNotEmpty()) {
-            val valueIterator = runningAnimatorArray.valueIterator()
-            valueIterator.forEach {
-                val index = runningAnimatorArray.indexOfValue(it)
-                val key = runningAnimatorArray.keyAt(index)
-                var containsKey = false
-                for (arrowDirection in arrowDirections) {
-                    val ordinal = arrowDirection.ordinal
-                    if (key == ordinal) {
-                        containsKey = true
-                        break
-                    }
-                }
-                if (containsKey) {
+        if (isStationOffline) return
+        post {
+            arrowDirections.forEach {
+                Log.d(
+                    TAG,
+                    "startArrowAnimation: ArrowDirection name: ${it.name} + ordinal: ${it.ordinal}"
+                )
+                val animatorByDirection =
+                    getAnimatorByDirectionIfNullCreateOne(it) ?: return@forEach
+                saveRunningAnimator(it, animatorByDirection)
+                if (animatorByDirection.isStarted) {
                     return@forEach
                 }
-                // 新动画集合中不包含该动画，需要结束动画并且移出集合
-                it.end()
-                runningAnimatorArray.removeAt(index)
+                animatorByDirection.start()
             }
         }
-        arrowDirections.forEach {
-            val animatorByDirection = getAnimatorByDirectionIfNullCreateOne(it)
-            saveRunningAnimator(it, animatorByDirection)
-            if (animatorByDirection.isStarted) {
-                return@forEach
-            }
-            animatorByDirection.start()
-        }
+
     }
 
     /**
@@ -735,8 +867,10 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
             return
         }
         val animator = runningAnimatorArray.get(arrowDirection.ordinal) ?: return
-        animator.end()
         runningAnimatorArray.remove(arrowDirection.ordinal)
+        post {
+            animator.end()
+        }
     }
 
     /**
@@ -748,9 +882,15 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
         if (arrowDirections.isEmpty() || runningAnimatorArray.isEmpty()) return
         // 停止动画并从正在进行的动画集合中移除
         arrowDirections.forEach {
-            val animator = runningAnimatorArray.get(it.ordinal)
-            animator.end()
+            Log.d(
+                TAG,
+                "startArrowAnimation: ArrowDirection name: ${it.name} + ordinal: ${it.ordinal}"
+            )
+            val animator = runningAnimatorArray.get(it.ordinal) ?: return@forEach
             runningAnimatorArray.removeAt(runningAnimatorArray.indexOfValue(animator))
+            post {
+                animator.end()
+            }
         }
     }
 
@@ -761,7 +901,7 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
     fun endAllArrowAnimations() {
         if (runningAnimatorArray.isEmpty()) return
         runningAnimatorArray.forEach { _, anim ->
-            anim.end()
+            anim.cancel()
         }
         runningAnimatorArray.clear()
     }
@@ -774,7 +914,8 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
     private fun ObjectAnimator.animatorConfig(): ObjectAnimator {
         interpolator = LinearInterpolator()
         repeatCount = ValueAnimator.INFINITE
-        duration = ANIMATION_DURATION
+//        startDelay = ANIMATION_START_DELAY
+        duration = mAnimationDuration
         return this
     }
 
@@ -788,8 +929,8 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
 //     * @return
 //     */
 //    private fun getAnimatorDuration(animatorLength: Float): Long {
-////        return (animatorLength / dy * ANIMATION_DURATION).toLong()
-//        return ANIMATION_DURATION
+////        return (animatorLength / dy * mAnimationDuration).toLong()
+//        return mAnimationDuration
 //    }
 
     // ---------------- 动画启动和取消区域结束 -------------------- //
@@ -798,24 +939,8 @@ class AcCoupleEsPathView(context: Context?, attrs: AttributeSet?) : View(context
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // 留出空间放各大组件
         setMeasuredDimension(
-            (VIEW_WIDTH + ELEMENT_CIRCLE_RADIUS * 2).toInt(),
-            (VIEW_HEIGHT + ELEMENT_CIRCLE_RADIUS * 2).toInt()
+            (mViewWidth + mElementCircleRadius * 2).toInt(),
+            (mViewHeight + mElementCircleRadius * 2).toInt()
         )
     }
-
-    enum class ArrowDirection {
-        PV_TO_INVERTER, // PV - 逆变器
-        INVERTER_TO_CENTER, // 逆变器 - 中间
-        CENTER_TO_TOP, // 中间 - 顶部
-        TOP_TO_CENTER, // 顶部 - 中间
-        CENTER_TO_AC, // 中间 - AC Couple
-        AC_TO_CENTER, // AC Couple - 中间
-        CENTER_TO_GRID_LOAD, // 中间 - 电网负载
-        BATTERY_TO_AC, // 电池 - AC Couple
-        AC_TO_BATTERY, // AC Couple - 电池
-        AC_TO_BACK_UP_LOAD, // AC Couple - Backup 负载
-        TOP_CENTER_TO_GRID, // 中间顶部 - 电网
-        GRID_TO_TOP_CENTER // 电网 - 中间顶部
-    }
-
 }

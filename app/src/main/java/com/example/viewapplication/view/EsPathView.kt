@@ -1,38 +1,21 @@
 package com.example.viewapplication.view
 
-import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.PathMeasure
 import android.util.AttributeSet
 import android.util.Log
-import android.util.SparseArray
 import android.view.View
 import android.view.animation.LinearInterpolator
-import androidx.core.util.forEach
-import androidx.core.util.isEmpty
 import com.example.viewapplication.R
-import com.example.viewapplication.dp
+import com.example.viewapplication.config.EsConfiguration
 import com.example.viewapplication.getColorById
 
-private val HORIZONTAL_DISTANCE = 28f.dp //
-private val VERTICAL_DISTANCE = 130f.dp
-private val ARC_RADIUS = 20f.dp
-private val MAX_BALL_RADIUS = 10f.dp
-private val ROUND_RADIUS = 40f.dp
-private val PATH_HORIZONTAL_PADDING = 40f.dp
-private val EXTRA_WIDTH = 4f.dp
-private val BALL_INNER_RADIUS = 4f.dp
-private val BALL_OUTER_RADIUS = 10f.dp
-
-private val CIRCLE_STROKE_WIDTH = 3f.dp
-private val CIRCLE_RADIUS = 40f.dp
-
-private val PATH_STROKE_WIDTH = 2f.dp
-
-private const val ANIMATION_START_DELAY = 2000L // 动画启动延时
-private const val ANIMATION_DURATION = 4000L // 动画运行时长
 private const val TAG = "EsPathView"
+
 /**
  *
  * @description 储能动图路径和小球动画
@@ -40,24 +23,26 @@ private const val TAG = "EsPathView"
  * @date 2022/02/24 14:35
  */
 class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = CIRCLE_STROKE_WIDTH
-        style = Paint.Style.STROKE
-    }
+    private val esConfig = EsConfiguration.get(context)
 
-    private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = CIRCLE_STROKE_WIDTH
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-    }
+    private val mHorizontalDistance = esConfig.horizontalDistance
+    private val mVerticalDistance = esConfig.verticalDistance
+    private val mArcRadius = esConfig.arcRadius
+    private val mMaxBallRadius = esConfig.maxBallRadius
+    private val mRoundRadius = esConfig.roundRadius
+    private val mPathHorizontalPadding = esConfig.pathHorizontalPadding
+    private val mExtraWidth = esConfig.extraWidth
+    private val mBallInnerRadius = esConfig.ballInnerRadius
+    private val mBallOuterRadius = esConfig.ballOuterRadius
+    private val mCircleRadius = esConfig.circleRadius
 
-    private val ballPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-    }
-    private val pathPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = PATH_STROKE_WIDTH
-    }
+    private lateinit var circlePaint: Paint
+    private lateinit var progressPaint: Paint
+    private lateinit var ballPaint: Paint
+    private lateinit var pathPaint: Paint
+
+    private val mAnimationDuration = esConfig.animationDuration
+    private val mAnimationDelay = esConfig.animationDelay
 
 
     /* -------------- 左上 ----------------*/
@@ -80,6 +65,17 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val rightBottomPos = floatArrayOf(0f, 0f)
     private val rightBottomTan = floatArrayOf(0f, 0f)
 
+    init {
+        initPaints()
+    }
+
+    private fun initPaints() {
+        circlePaint = esConfig.circlePaint
+        progressPaint = esConfig.progressPaint
+        ballPaint = esConfig.ballPaint
+        pathPaint = esConfig.pathPaint
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         initLeftTopPath()
         initRightTopPath()
@@ -99,28 +95,28 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerY = height / 2f
 
         // path初始位置
-        leftTopPos[0] = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE)
-        leftTopPos[1] = centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
+        leftTopPos[0] = centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance)
+        leftTopPos[1] = centerY - (mVerticalDistance + mArcRadius)
         Log.d(TAG, "初始化: leftTopPos[0]：${leftTopPos[0]},leftTopPos[1]:${leftTopPos[1]}")
         leftTopPath.moveTo(
             leftTopPos[0],
             leftTopPos[1]
         )
         leftTopPath.lineTo(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius),
+            centerY - (mVerticalDistance + mArcRadius)
         )
         leftTopPath.arcTo(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS * 2),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
-            centerX - PATH_HORIZONTAL_PADDING / 2,
-            centerY - VERTICAL_DISTANCE + ARC_RADIUS,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius * 2),
+            centerY - (mVerticalDistance + mArcRadius),
+            centerX - mPathHorizontalPadding / 2,
+            centerY - mVerticalDistance + mArcRadius,
             270f,
             90f,
             false
         )
         leftTopPath.lineTo(
-            centerX - PATH_HORIZONTAL_PADDING / 2,
+            centerX - mPathHorizontalPadding / 2,
             centerY
         )
     }
@@ -137,28 +133,28 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerY = height / 2f
 
         // path初始位置
-        rightTopPos[0] = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
-        rightTopPos[1] = centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
+        rightTopPos[0] = centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) - mMaxBallRadius
+        rightTopPos[1] = centerY - (mVerticalDistance + mArcRadius)
 
         rightTopPath.moveTo(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance),
+            centerY - (mVerticalDistance + mArcRadius)
         )
         rightTopPath.lineTo(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius),
+            centerY - (mVerticalDistance + mArcRadius)
         )
         rightTopPath.arcTo(
-            centerX + PATH_HORIZONTAL_PADDING / 2,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS * 2),
-            centerY - VERTICAL_DISTANCE + ARC_RADIUS,
+            centerX + mPathHorizontalPadding / 2,
+            centerY - (mVerticalDistance + mArcRadius),
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius * 2),
+            centerY - mVerticalDistance + mArcRadius,
             270f,
             -90f,
             false
         )
         rightTopPath.lineTo(
-            centerX + PATH_HORIZONTAL_PADDING / 2,
+            centerX + mPathHorizontalPadding / 2,
             centerY
         )
     }
@@ -175,29 +171,29 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerY = height / 2f
 
         // path初始位置
-        leftBottomPos[0] = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
-        leftBottomPos[1] = centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+        leftBottomPos[0] = centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) + mMaxBallRadius
+        leftBottomPos[1] = centerY + (mVerticalDistance + mArcRadius)
 
         // 移动至path初始位置
         leftBottomPath.moveTo(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance),
+            centerY + (mVerticalDistance + mArcRadius)
         )
         leftBottomPath.lineTo(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius),
+            centerY + (mVerticalDistance + mArcRadius)
         )
         leftBottomPath.arcTo(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS * 2),
-            centerY + VERTICAL_DISTANCE - ARC_RADIUS,
-            centerX - PATH_HORIZONTAL_PADDING / 2,
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS),
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius * 2),
+            centerY + mVerticalDistance - mArcRadius,
+            centerX - mPathHorizontalPadding / 2,
+            centerY + (mVerticalDistance + mArcRadius),
             90f,
             -90f,
             false
         )
         leftBottomPath.lineTo(
-            centerX - PATH_HORIZONTAL_PADDING / 2,
+            centerX - mPathHorizontalPadding / 2,
             centerY
         )
     }
@@ -214,29 +210,29 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val centerY = height / 2f
 
         // 小球初始位置
-        rightBottomPos[0] = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
-        rightBottomPos[1] = centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+        rightBottomPos[0] = centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) - mMaxBallRadius
+        rightBottomPos[1] = centerY + (mVerticalDistance + mArcRadius)
 
         // 移动至path初始位置
         rightBottomPath.moveTo(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance),
+            centerY + (mVerticalDistance + mArcRadius)
         )
         rightBottomPath.lineTo(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS)
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius),
+            centerY + (mVerticalDistance + mArcRadius)
         )
         rightBottomPath.arcTo(
-            centerX + PATH_HORIZONTAL_PADDING / 2,
-            centerY + VERTICAL_DISTANCE - ARC_RADIUS,
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS * 2),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS),
+            centerX + mPathHorizontalPadding / 2,
+            centerY + mVerticalDistance - mArcRadius,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius * 2),
+            centerY + (mVerticalDistance + mArcRadius),
             90f,
             90f,
             false
         )
         rightBottomPath.lineTo(
-            centerX + PATH_HORIZONTAL_PADDING / 2,
+            centerX + mPathHorizontalPadding / 2,
             centerY
         )
     }
@@ -262,7 +258,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun drawLeftTop(centerX: Float, centerY: Float, canvas: Canvas) {
         // 初始小球圆心x轴位置
-        val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
+        val ballStartX = centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) + mMaxBallRadius
         val pos0 = leftTopPos[0]
         val pos1 = leftTopPos[1]
         val ballCenterX = maxOf(pos0, ballStartX)
@@ -271,7 +267,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_INNER_RADIUS,
+            mBallInnerRadius,
             ballPaint
         )
         // 画运动小球外径
@@ -279,7 +275,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_OUTER_RADIUS,
+            mBallOuterRadius,
             ballPaint
         )
 
@@ -290,18 +286,18 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // 画圆
         circlePaint.color = getColorById(context, R.color.yellow_4d_f0cf00_color)
         canvas.drawCircle(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
-            CIRCLE_RADIUS,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius),
+            centerY - (mVerticalDistance + mArcRadius),
+            mCircleRadius,
             circlePaint
         )
         // 画进度
         progressPaint.color = getColorById(context, R.color.yellow_f0cf00_color)
         canvas.drawArc(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) - mCircleRadius,
+            centerY - (mVerticalDistance + mArcRadius) - mCircleRadius,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) + mCircleRadius,
+            centerY - (mVerticalDistance + mArcRadius) + mCircleRadius,
             -90f,
             90f,
             false,
@@ -313,18 +309,18 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // 画圆
         circlePaint.color = getColorById(context, R.color.red_4d_f56d66_color)
         canvas.drawCircle(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS),
-            CIRCLE_RADIUS,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius),
+            centerY - (mVerticalDistance + mArcRadius),
+            mCircleRadius,
             circlePaint
         )
         // 画进度
         progressPaint.color = getColorById(context, R.color.red_f56d66_color)
         canvas.drawArc(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
-            centerY - (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) - mCircleRadius,
+            centerY - (mVerticalDistance + mArcRadius) - mCircleRadius,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) + mCircleRadius,
+            centerY - (mVerticalDistance + mArcRadius) + mCircleRadius,
             -90f,
             90f,
             false,
@@ -332,7 +328,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         )
 
         // 初始小球圆心x轴位置
-        val ballStartX = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
+        val ballStartX = centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) - mMaxBallRadius
         val pos0 = rightTopPos[0]
         val pos1 = rightTopPos[1]
         val ballCenterX = minOf(pos0,ballStartX)
@@ -341,7 +337,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_INNER_RADIUS,
+            mBallInnerRadius,
             ballPaint
         )
         // 画运动小球外径
@@ -349,7 +345,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_OUTER_RADIUS,
+            mBallOuterRadius,
             ballPaint
         )
         // 画路径
@@ -361,18 +357,18 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // 画圆
         circlePaint.color = getColorById(context, R.color.green_33_aed681_color)
         canvas.drawCircle(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS),
-            CIRCLE_RADIUS,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius),
+            centerY + (mVerticalDistance + mArcRadius),
+            mCircleRadius,
             circlePaint
         )
         // 画进度
         progressPaint.color = getColorById(context, R.color.green_aed681_color)
         canvas.drawArc(
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) - mCircleRadius,
+            centerY + (mVerticalDistance + mArcRadius) - mCircleRadius,
+            centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) + mCircleRadius,
+            centerY + (mVerticalDistance + mArcRadius) + mCircleRadius,
             -90f,
             90f,
             false,
@@ -380,7 +376,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         )
 
         // 初始小球圆心x轴位置
-        val ballStartX = centerX - (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) + MAX_BALL_RADIUS
+        val ballStartX = centerX - (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) + mMaxBallRadius
         val pos0 = leftBottomPos[0]
         val pos1 = leftBottomPos[1]
         val ballCenterX = maxOf(pos0,ballStartX)
@@ -389,7 +385,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_INNER_RADIUS,
+            mBallInnerRadius,
             ballPaint
         )
         // 画运动小球外径
@@ -397,7 +393,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             ballCenterX,
             pos1,
-            BALL_OUTER_RADIUS,
+            mBallOuterRadius,
             ballPaint
         )
         // 画路径
@@ -409,18 +405,18 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // 画圆
         circlePaint.color = getColorById(context, R.color.orange_4d_fda23a_color)
         canvas.drawCircle(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS),
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS),
-            CIRCLE_RADIUS,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius),
+            centerY + (mVerticalDistance + mArcRadius),
+            mCircleRadius,
             circlePaint
         )
         // 画进度
         progressPaint.color = getColorById(context, R.color.orange_fda23a_color)
         canvas.drawArc(
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) - CIRCLE_RADIUS,
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS) - CIRCLE_RADIUS,
-            centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE + CIRCLE_RADIUS) + CIRCLE_RADIUS,
-            centerY + (VERTICAL_DISTANCE + ARC_RADIUS) + CIRCLE_RADIUS,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) - mCircleRadius,
+            centerY + (mVerticalDistance + mArcRadius) - mCircleRadius,
+            centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance + mCircleRadius) + mCircleRadius,
+            centerY + (mVerticalDistance + mArcRadius) + mCircleRadius,
             -90f,
             90f,
             false,
@@ -429,7 +425,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 
         // 初始小球圆心x轴位置
-        val ballStartX = centerX + (PATH_HORIZONTAL_PADDING / 2 + ARC_RADIUS + HORIZONTAL_DISTANCE) - MAX_BALL_RADIUS
+        val ballStartX = centerX + (mPathHorizontalPadding / 2 + mArcRadius + mHorizontalDistance) - mMaxBallRadius
         val pos0 = rightBottomPos[0]
         val pos1 = rightBottomPos[1]
         val ballCenterX = minOf(pos0,ballStartX)
@@ -439,7 +435,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             pos0,
             pos1,
-            BALL_INNER_RADIUS,
+            mBallInnerRadius,
             ballPaint
         )
         // 画运动小球外径
@@ -447,7 +443,7 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawCircle(
             pos0,
             pos1,
-            BALL_OUTER_RADIUS,
+            mBallOuterRadius,
             ballPaint
         )
         // 画路径
@@ -468,8 +464,8 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.startDelay = ANIMATION_START_DELAY
-        valueAnimator.duration = ANIMATION_DURATION
+        valueAnimator.startDelay = mAnimationDelay
+        valueAnimator.duration = mAnimationDuration
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
@@ -497,8 +493,8 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.startDelay = ANIMATION_START_DELAY
-        valueAnimator.duration = ANIMATION_DURATION
+        valueAnimator.startDelay = mAnimationDelay
+        valueAnimator.duration = mAnimationDuration
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
@@ -525,8 +521,8 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.startDelay = ANIMATION_START_DELAY
-        valueAnimator.duration = ANIMATION_DURATION
+        valueAnimator.startDelay = mAnimationDelay
+        valueAnimator.duration = mAnimationDuration
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
@@ -554,8 +550,8 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         val valueAnimator = ValueAnimator.ofFloat(0f, length)
         valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.startDelay = ANIMATION_START_DELAY
-        valueAnimator.duration = ANIMATION_DURATION
+        valueAnimator.startDelay = mAnimationDelay
+        valueAnimator.duration = mAnimationDuration
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val animatedValue = animation.animatedValue as Float
@@ -579,11 +575,11 @@ class EsPathView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // 左右各增加一个圆画笔的宽度以便不挡住线
         val width =
-            (CIRCLE_RADIUS * 2 + HORIZONTAL_DISTANCE + ARC_RADIUS) * 2 + PATH_HORIZONTAL_PADDING
-        val height = (CIRCLE_RADIUS + VERTICAL_DISTANCE + ARC_RADIUS) * 2
+            (mCircleRadius * 2 + mHorizontalDistance + mArcRadius) * 2 + mPathHorizontalPadding
+        val height = (mCircleRadius + mVerticalDistance + mArcRadius) * 2
         setMeasuredDimension(
-            (width + EXTRA_WIDTH).toInt(),
-            (height + EXTRA_WIDTH).toInt()
+            (width + mExtraWidth).toInt(),
+            (height + mExtraWidth).toInt()
         )
     }
 
