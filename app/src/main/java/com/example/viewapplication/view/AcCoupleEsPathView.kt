@@ -6,19 +6,14 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.util.*
-import com.example.viewapplication.R
 import com.example.viewapplication.config.AcConfiguration
-import com.example.viewapplication.dp
-import com.example.viewapplication.enumeration.ArrowDirection
-import com.example.viewapplication.getColorById
-import kotlin.math.tan
+import com.example.viewapplication.enumeration.EsAnimationDirection
 
 /**
  *
@@ -296,12 +291,12 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * 动画已经启动
      *
-     * @param arrowDirection
+     * @param esAnimationDirection
      * @return
      */
-    private fun isAnimating(arrowDirection: ArrowDirection): Boolean {
+    private fun isAnimating(esAnimationDirection: EsAnimationDirection): Boolean {
         if (runningAnimatorArray.isEmpty()) return false
-        return runningAnimatorArray.containsKey(arrowDirection.ordinal)
+        return runningAnimatorArray.containsKey(esAnimationDirection.ordinal)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -316,8 +311,8 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (inverterOffline) mOfflinePaint else pvInverterPaint
         )
         if (inverterOffline) {
-            endArrowAnimation(ArrowDirection.PV_TO_INVERTER)
-        } else if (isAnimating(ArrowDirection.PV_TO_INVERTER)) {
+            endArrowAnimation(EsAnimationDirection.PV_TO_INVERTER)
+        } else if (isAnimating(EsAnimationDirection.PV_TO_INVERTER)) {
             initPvToInverterArrowPath()
             canvas.drawPath(pvToInverterArrowPath, mBlueArrowPaint)
         }
@@ -330,8 +325,8 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (inverterOffline) mOfflinePaint else inverterCenterPaint
         )
         if (inverterOffline) {
-            endArrowAnimation(ArrowDirection.INVERTER_TO_CENTER)
-        } else if (isAnimating(ArrowDirection.INVERTER_TO_CENTER)) {
+            endArrowAnimation(EsAnimationDirection.INVERTER_TO_CENTER)
+        } else if (isAnimating(EsAnimationDirection.INVERTER_TO_CENTER)) {
             initInverterToCenterArrowPath()
             canvas.drawPath(inverterToCenterArrowPath, mGreenArrowPaint)
         }
@@ -346,11 +341,11 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (batteryOffline) mOfflinePaint else batteryAcPaint
         )
         if (batteryOffline) {
-            endArrowAnimations(ArrowDirection.BATTERY_TO_AC, ArrowDirection.AC_TO_BATTERY)
-        } else if (isAnimating(ArrowDirection.BATTERY_TO_AC)) {
+            endArrowAnimations(EsAnimationDirection.BATTERY_TO_AC, EsAnimationDirection.AC_TO_BATTERY)
+        } else if (isAnimating(EsAnimationDirection.BATTERY_TO_AC)) {
             initBatteryToAcArrowPath()
             canvas.drawPath(batteryToAcArrowPath, mBlueArrowPaint)
-        } else if (isAnimating(ArrowDirection.AC_TO_BATTERY)) {
+        } else if (isAnimating(EsAnimationDirection.AC_TO_BATTERY)) {
             initAcToBatteryArrowPath()
             canvas.drawPath(acToBatteryArrowPath, mBlueArrowPaint)
         }
@@ -366,11 +361,11 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (allAcOffline) mOfflinePaint else topCenterPaint
         )
         if (allAcOffline) {
-            endArrowAnimations(ArrowDirection.CENTER_TO_TOP, ArrowDirection.TOP_TO_CENTER)
-        } else if (isAnimating(ArrowDirection.CENTER_TO_TOP)) {
+            endArrowAnimations(EsAnimationDirection.CENTER_TO_TOP, EsAnimationDirection.TOP_TO_CENTER)
+        } else if (isAnimating(EsAnimationDirection.CENTER_TO_TOP)) {
             initCenterToTopArrowPath()
             canvas.drawPath(centerToTopArrowPath, mGreenArrowPaint)
-        } else if (isAnimating(ArrowDirection.TOP_TO_CENTER)) {
+        } else if (isAnimating(EsAnimationDirection.TOP_TO_CENTER)) {
             initTopToCenterArrowPath()
             canvas.drawPath(topToCenterArrowPath, mGreenArrowPaint)
         }
@@ -383,11 +378,11 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (allAcOffline) mOfflinePaint else gridPaint
         )
         if (allAcOffline) {
-            endArrowAnimations(ArrowDirection.TOP_CENTER_TO_GRID, ArrowDirection.GRID_TO_TOP_CENTER)
-        } else if (isAnimating(ArrowDirection.TOP_CENTER_TO_GRID)) {
+            endArrowAnimations(EsAnimationDirection.TOP_CENTER_TO_GRID, EsAnimationDirection.GRID_TO_TOP_CENTER)
+        } else if (isAnimating(EsAnimationDirection.TOP_CENTER_TO_GRID)) {
             initTopCenterToGridArrowPath()
             canvas.drawPath(topCenterToGridArrowPath, mGreenArrowPaint)
-        } else if (isAnimating(ArrowDirection.GRID_TO_TOP_CENTER)) {
+        } else if (isAnimating(EsAnimationDirection.GRID_TO_TOP_CENTER)) {
             initGridToTopCenterArrowPath()
             canvas.drawPath(gridToTopCenterArrowPath, mGreenArrowPaint)
         }
@@ -400,8 +395,8 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (allAcOffline) mOfflinePaint else gridLoadPaint
         )
         if (allAcOffline) {
-            endArrowAnimation(ArrowDirection.CENTER_TO_GRID_LOAD)
-        } else if (isAnimating(ArrowDirection.CENTER_TO_GRID_LOAD)) {
+            endArrowAnimation(EsAnimationDirection.CENTER_TO_GRID_LOAD)
+        } else if (isAnimating(EsAnimationDirection.CENTER_TO_GRID_LOAD)) {
             initCenterToGridLoadArrowPath()
             canvas.drawPath(centerToGridLoadArrowPath, mGreenArrowPaint)
         }
@@ -414,11 +409,11 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (allAcOffline) mOfflinePaint else centerAcPaint
         )
         if (allAcOffline) {
-            endArrowAnimations(ArrowDirection.CENTER_TO_AC, ArrowDirection.AC_TO_CENTER)
-        } else if (isAnimating(ArrowDirection.CENTER_TO_AC)) {
+            endArrowAnimations(EsAnimationDirection.CENTER_TO_AC, EsAnimationDirection.AC_TO_CENTER)
+        } else if (isAnimating(EsAnimationDirection.CENTER_TO_AC)) {
             initCenterToAcArrowPath()
             canvas.drawPath(centerToAcArrowPath, mGreenArrowPaint)
-        } else if (isAnimating(ArrowDirection.AC_TO_CENTER)) {
+        } else if (isAnimating(EsAnimationDirection.AC_TO_CENTER)) {
             initAcToCenterArrowPath()
             canvas.drawPath(acToCenterArrowPath, mGreenArrowPaint)
         }
@@ -441,8 +436,8 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             if (singleAcOffline) mOfflinePaint else acBackupLoadPaint
         )
         if (singleAcOffline) {
-            endArrowAnimation(ArrowDirection.AC_TO_BACK_UP_LOAD)
-        } else if (isAnimating(ArrowDirection.AC_TO_BACK_UP_LOAD)) {
+            endArrowAnimation(EsAnimationDirection.AC_TO_BACK_UP_LOAD)
+        } else if (isAnimating(EsAnimationDirection.AC_TO_BACK_UP_LOAD)) {
             initAcToBackupArrowPath()
             canvas.drawPath(acToBackupArrowPath, mGreenArrowPaint)
         }
@@ -716,23 +711,23 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * Get animator property name by direction
      * 通过箭头方向获取动画属性名称
-     * @param arrowDirection
+     * @param esAnimationDirection
      * @return
      */
-    private fun getAnimatorPropertyNameByDirection(arrowDirection: ArrowDirection): String? {
-        return when (arrowDirection) {
-            ArrowDirection.PV_TO_INVERTER -> "pvToInverterDy"
-            ArrowDirection.INVERTER_TO_CENTER -> "inverterToCenterDx"
-            ArrowDirection.CENTER_TO_TOP -> "centerToTopDy"
-            ArrowDirection.TOP_TO_CENTER -> "topToCenterDy"
-            ArrowDirection.CENTER_TO_AC -> "centerToAcDy"
-            ArrowDirection.AC_TO_CENTER -> "acToCenterDy"
-            ArrowDirection.CENTER_TO_GRID_LOAD -> "centerToGridLoadDx"
-            ArrowDirection.BATTERY_TO_AC -> "batteryToAcDx"
-            ArrowDirection.AC_TO_BATTERY -> "acToBatteryDx"
-            ArrowDirection.AC_TO_BACK_UP_LOAD -> "acToBackupDx"
-            ArrowDirection.TOP_CENTER_TO_GRID -> "topCenterToGridDx"
-            ArrowDirection.GRID_TO_TOP_CENTER -> "gridToTopCenterDx"
+    private fun getAnimatorPropertyNameByDirection(esAnimationDirection: EsAnimationDirection): String? {
+        return when (esAnimationDirection) {
+            EsAnimationDirection.PV_TO_INVERTER -> "pvToInverterDy"
+            EsAnimationDirection.INVERTER_TO_CENTER -> "inverterToCenterDx"
+            EsAnimationDirection.CENTER_TO_TOP -> "centerToTopDy"
+            EsAnimationDirection.TOP_TO_CENTER -> "topToCenterDy"
+            EsAnimationDirection.CENTER_TO_AC -> "centerToAcDy"
+            EsAnimationDirection.AC_TO_CENTER -> "acToCenterDy"
+            EsAnimationDirection.CENTER_TO_GRID_LOAD -> "centerToGridLoadDx"
+            EsAnimationDirection.BATTERY_TO_AC -> "batteryToAcDx"
+            EsAnimationDirection.AC_TO_BATTERY -> "acToBatteryDx"
+            EsAnimationDirection.AC_TO_BACK_UP_LOAD -> "acToBackupDx"
+            EsAnimationDirection.TOP_CENTER_TO_GRID -> "topCenterToGridDx"
+            EsAnimationDirection.GRID_TO_TOP_CENTER -> "gridToTopCenterDx"
             else -> null
         }
     }
@@ -740,22 +735,22 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * Get animator length by direction
      * 通过箭头方向获取动画的长度
-     * @param arrowDirection
+     * @param esAnimationDirection
      * @return
      */
-    private fun getAnimatorLengthByDirection(arrowDirection: ArrowDirection): Float? {
-        return when (arrowDirection) {
-            ArrowDirection.PV_TO_INVERTER -> dy - mElementCircleRadius * 2
-            ArrowDirection.INVERTER_TO_CENTER -> dx - mElementCircleRadius - mArrowHeight
-            ArrowDirection.CENTER_TO_TOP -> dy - mArrowHeight
-            ArrowDirection.TOP_TO_CENTER -> dy - mArrowHeight
-            ArrowDirection.CENTER_TO_AC -> dy - mElementCircleRadius
-            ArrowDirection.AC_TO_CENTER -> dy - mElementCircleRadius
-            ArrowDirection.CENTER_TO_GRID_LOAD -> dx - mArrowHeight
-            ArrowDirection.BATTERY_TO_AC, ArrowDirection.AC_TO_BATTERY, ArrowDirection.AC_TO_BACK_UP_LOAD
+    private fun getAnimatorLengthByDirection(esAnimationDirection: EsAnimationDirection): Float? {
+        return when (esAnimationDirection) {
+            EsAnimationDirection.PV_TO_INVERTER -> dy - mElementCircleRadius * 2
+            EsAnimationDirection.INVERTER_TO_CENTER -> dx - mElementCircleRadius - mArrowHeight
+            EsAnimationDirection.CENTER_TO_TOP -> dy - mArrowHeight
+            EsAnimationDirection.TOP_TO_CENTER -> dy - mArrowHeight
+            EsAnimationDirection.CENTER_TO_AC -> dy - mElementCircleRadius
+            EsAnimationDirection.AC_TO_CENTER -> dy - mElementCircleRadius
+            EsAnimationDirection.CENTER_TO_GRID_LOAD -> dx - mArrowHeight
+            EsAnimationDirection.BATTERY_TO_AC, EsAnimationDirection.AC_TO_BATTERY, EsAnimationDirection.AC_TO_BACK_UP_LOAD
             -> dx - mElementCircleRadius * 2 + mArrowHeight
-            ArrowDirection.TOP_CENTER_TO_GRID -> dx - mElementCircleRadius
-            ArrowDirection.GRID_TO_TOP_CENTER -> dx - mElementCircleRadius
+            EsAnimationDirection.TOP_CENTER_TO_GRID -> dx - mElementCircleRadius
+            EsAnimationDirection.GRID_TO_TOP_CENTER -> dx - mElementCircleRadius
             else -> null
         }
     }
@@ -763,27 +758,27 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * Get animator by direction from map
      * 从集合里取出动画，如果没有，返回null
-     * @param arrowDirection
+     * @param esAnimationDirection
      * @return
      */
-    private fun getAnimatorByDirectionFromMap(arrowDirection: ArrowDirection): ObjectAnimator? {
+    private fun getAnimatorByDirectionFromMap(esAnimationDirection: EsAnimationDirection): ObjectAnimator? {
         if (animatorArray.isEmpty()) return null
-        return animatorArray.get(arrowDirection.ordinal)
+        return animatorArray.get(esAnimationDirection.ordinal)
     }
 
     /**
      * Get animator by direction or new animator
      * 通过箭头方向获取动画（如果没有就创建一个，然后存起来）
-     * @param arrowDirection
+     * @param esAnimationDirection
      * @return
      */
-    private fun getAnimatorByDirectionIfNullCreateOne(arrowDirection: ArrowDirection): ObjectAnimator? {
-        val animator = getAnimatorByDirectionFromMap(arrowDirection)
+    private fun getAnimatorByDirectionIfNullCreateOne(esAnimationDirection: EsAnimationDirection): ObjectAnimator? {
+        val animator = getAnimatorByDirectionFromMap(esAnimationDirection)
         val startFloat = 0f
-        val animatorLength = getAnimatorLengthByDirection(arrowDirection) ?: return null
+        val animatorLength = getAnimatorLengthByDirection(esAnimationDirection) ?: return null
         // 还没有保存过的动画
         if (animator == null) {
-            val propertyName = getAnimatorPropertyNameByDirection(arrowDirection) ?: return null
+            val propertyName = getAnimatorPropertyNameByDirection(esAnimationDirection) ?: return null
             Log.d(
                 TAG,
                 "getAnimatorByDirectionIfNullCreateOne: propertyName:$propertyName  animatorLength:$animatorLength"
@@ -791,7 +786,7 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
             val newAnimator =
                 ObjectAnimator.ofFloat(this, propertyName, startFloat, animatorLength)
                     .animatorConfig()
-            animatorArray.put(arrowDirection.ordinal, newAnimator)
+            animatorArray.put(esAnimationDirection.ordinal, newAnimator)
             return newAnimator
         }
         // 动画已经初始化过了，更新下动画起点和终点
@@ -800,38 +795,38 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     }
 
     private fun saveRunningAnimator(
-        arrowDirection: ArrowDirection,
+        esAnimationDirection: EsAnimationDirection,
         objectAnimator: ObjectAnimator
     ) {
         if (runningAnimatorArray.isEmpty()) {
-            runningAnimatorArray.put(arrowDirection.ordinal, objectAnimator)
+            runningAnimatorArray.put(esAnimationDirection.ordinal, objectAnimator)
             return
         }
-        val animator = runningAnimatorArray.get(arrowDirection.ordinal)
+        val animator = runningAnimatorArray.get(esAnimationDirection.ordinal)
         if (animator == null) {
-            runningAnimatorArray.put(arrowDirection.ordinal, objectAnimator)
+            runningAnimatorArray.put(esAnimationDirection.ordinal, objectAnimator)
         }
     }
 
     /**
      * Start arrow animation
      * 启动单独箭头动画
-     * @param arrowDirection
+     * @param esAnimationDirection
      */
-    fun startArrowAnimation(arrowDirection: ArrowDirection) {
-        startArrowAnimations(arrowDirection)
+    fun startArrowAnimation(esAnimationDirection: EsAnimationDirection) {
+        startArrowAnimations(esAnimationDirection)
     }
 
     /**
      * Start arrow animations
      * 开启一些箭头动画
-     * @param arrowDirections
+     * @param esAnimationDirections
      */
-    fun startArrowAnimations(arrowDirections: List<ArrowDirection>) {
-        if (arrowDirections.isEmpty()) return
+    fun startArrowAnimations(esAnimationDirections: List<EsAnimationDirection>) {
+        if (esAnimationDirections.isEmpty()) return
         if (isStationOffline) return
         post {
-            arrowDirections.forEach {
+            esAnimationDirections.forEach {
                 Log.d(
                     TAG,
                     "startArrowAnimation: ArrowDirection name: ${it.name} + ordinal: ${it.ordinal}"
@@ -851,23 +846,23 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * Start arrow animations
      * 开启一些箭头动画
-     * @param arrowDirections
+     * @param esAnimationDirections
      */
-    fun startArrowAnimations(vararg arrowDirections: ArrowDirection) {
-        startArrowAnimations(arrowDirections.toList())
+    fun startArrowAnimations(vararg esAnimationDirections: EsAnimationDirection) {
+        startArrowAnimations(esAnimationDirections.toList())
     }
 
     /**
      * End arrow animation
      * 取消某个箭头动画
-     * @param arrowDirection
+     * @param esAnimationDirection
      */
-    fun endArrowAnimation(arrowDirection: ArrowDirection) {
+    fun endArrowAnimation(esAnimationDirection: EsAnimationDirection) {
         if (runningAnimatorArray.isEmpty()) {
             return
         }
-        val animator = runningAnimatorArray.get(arrowDirection.ordinal) ?: return
-        runningAnimatorArray.remove(arrowDirection.ordinal)
+        val animator = runningAnimatorArray.get(esAnimationDirection.ordinal) ?: return
+        runningAnimatorArray.remove(esAnimationDirection.ordinal)
         post {
             animator.end()
         }
@@ -876,12 +871,12 @@ class AcCoupleEsPathView(context: Context, attrs: AttributeSet?) : View(context,
     /**
      * End arrow animations
      * 取消某些箭头动画
-     * @param arrowDirections
+     * @param esAnimationDirections
      */
-    fun endArrowAnimations(vararg arrowDirections: ArrowDirection) {
-        if (arrowDirections.isEmpty() || runningAnimatorArray.isEmpty()) return
+    fun endArrowAnimations(vararg esAnimationDirections: EsAnimationDirection) {
+        if (esAnimationDirections.isEmpty() || runningAnimatorArray.isEmpty()) return
         // 停止动画并从正在进行的动画集合中移除
-        arrowDirections.forEach {
+        esAnimationDirections.forEach {
             Log.d(
                 TAG,
                 "startArrowAnimation: ArrowDirection name: ${it.name} + ordinal: ${it.ordinal}"

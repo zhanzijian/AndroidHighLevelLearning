@@ -17,6 +17,17 @@
 
         android:gravity="center">
 
+        <!--<Button
+            android:id="@+id/pauseService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂停"/>
+        <Button
+            android:id="@+id/continueService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="继续"/>-->
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/esPath"
             android:layout_width="wrap_content"

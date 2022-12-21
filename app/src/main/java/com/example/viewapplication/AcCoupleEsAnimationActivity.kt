@@ -3,8 +3,7 @@ package com.example.viewapplication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.viewapplication.databinding.ActivityAcCoupleEsAnimationBinding
-import com.example.viewapplication.enumeration.ArrowDirection
-import com.example.viewapplication.view.AcCoupleEsPathView
+import com.example.viewapplication.enumeration.EsAnimationDirection
 
 class AcCoupleEsAnimationActivity : AppCompatActivity() {
     private val binding by lazy {
@@ -17,14 +16,14 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
         binding.start.setOnClickListener {
 //            binding.acCouplePath.isOffline = true
             binding.acCouplePath.startArrowAnimations(
-                ArrowDirection.PV_TO_INVERTER,
-                ArrowDirection.INVERTER_TO_CENTER,
-                ArrowDirection.AC_TO_CENTER,
-                ArrowDirection.CENTER_TO_GRID_LOAD,
-                ArrowDirection.AC_TO_BATTERY,
-                ArrowDirection.AC_TO_BACK_UP_LOAD,
-                ArrowDirection.TOP_TO_CENTER,
-                ArrowDirection.GRID_TO_TOP_CENTER
+                EsAnimationDirection.PV_TO_INVERTER,
+                EsAnimationDirection.INVERTER_TO_CENTER,
+                EsAnimationDirection.AC_TO_CENTER,
+                EsAnimationDirection.CENTER_TO_GRID_LOAD,
+                EsAnimationDirection.AC_TO_BATTERY,
+                EsAnimationDirection.AC_TO_BACK_UP_LOAD,
+                EsAnimationDirection.TOP_TO_CENTER,
+                EsAnimationDirection.GRID_TO_TOP_CENTER
             )
 //            binding.acCouplePath.startPvToInverterAnimation()
 //            binding.acCouplePath.startInverterToCenterAnimation()
@@ -33,10 +32,10 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
         }
         binding.start1.setOnClickListener {
             binding.acCouplePath.startArrowAnimations(
-                ArrowDirection.PV_TO_INVERTER,
-                ArrowDirection.INVERTER_TO_CENTER,
-                ArrowDirection.AC_TO_CENTER,
-                ArrowDirection.CENTER_TO_GRID_LOAD,
+                EsAnimationDirection.PV_TO_INVERTER,
+                EsAnimationDirection.INVERTER_TO_CENTER,
+                EsAnimationDirection.AC_TO_CENTER,
+                EsAnimationDirection.CENTER_TO_GRID_LOAD,
             )
         }
         binding.cancel.setOnClickListener {
@@ -48,7 +47,7 @@ class AcCoupleEsAnimationActivity : AppCompatActivity() {
         }
 
         binding.cancelCenterToTop.setOnClickListener {
-            binding.acCouplePath.endArrowAnimation(ArrowDirection.TOP_TO_CENTER)
+            binding.acCouplePath.endArrowAnimation(EsAnimationDirection.TOP_TO_CENTER)
         }
     }
 }

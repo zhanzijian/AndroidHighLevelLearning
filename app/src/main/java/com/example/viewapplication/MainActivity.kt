@@ -3,19 +3,21 @@ package com.example.viewapplication
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
+import androidx.test.espresso.core.internal.deps.guava.util.concurrent.ThreadFactoryBuilder
 import com.example.viewapplication.databinding.ActivityMainBinding
 import com.example.viewapplication.retrofit.GithubService
 import com.example.viewapplication.retrofit.Repo
-import com.example.viewapplication.view.EsPathView
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.Function
 import io.reactivex.rxjava3.internal.operators.single.SingleJust
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.notify
+import okhttp3.internal.threadFactory
+import okhttp3.internal.toHexString
+import okhttp3.internal.wait
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,6 +25,9 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
 
 private const val COMMA = "."
 private const val COORDINATE_MIN_SCALE = 6
@@ -33,9 +38,21 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+//        val namedThreadFactory: ThreadFactory = threadFactory("gl-pool-%d",false)
+//        val mScheduledExecutorService = ScheduledThreadPoolExecutor(1, namedThreadFactory)
+//        var scheduledFuture = mScheduledExecutorService.scheduleWithFixedDelay(
+//            Runnable {
+//                Log.d("MainActivity", "scheduleWithFixedDelay: ")
+//            },
+//            1,
+//            1,
+//            TimeUnit.SECONDS
+//        )
 
         binding.apply {
             esPath.setOnClickListener {
@@ -44,6 +61,19 @@ class MainActivity : AppCompatActivity() {
             acCouplePath.setOnClickListener {
                 startActivity(Intent(this@MainActivity, AcCoupleEsAnimationActivity::class.java))
             }
+//            pauseService.setOnClickListener {
+//                scheduledFuture.cancel(true)
+//            }
+//            continueService.setOnClickListener {
+//                scheduledFuture = mScheduledExecutorService.scheduleWithFixedDelay(
+//                    Runnable {
+//                        Log.d("MainActivity", "scheduleWithFixedDelay: ")
+//                    },
+//                    1,
+//                    1,
+//                    TimeUnit.SECONDS
+//                )
+//            }
         }
 
 
