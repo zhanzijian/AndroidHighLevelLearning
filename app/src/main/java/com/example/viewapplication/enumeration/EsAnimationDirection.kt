@@ -20,6 +20,7 @@ enum class EsAnimationDirection {
     GRID_TO_GRID_LOAD, // 电网 - 电网负载
     INVERTER_TO_GRID_LOAD, // 逆变器 - 电网负载
     INVERTER_TO_BACKUP_LOAD, // 逆变器 - backup 负载
+    GEN_TO_INVERTER, // 发电机 - 逆变器
 
     // *********** 多个AC的情况 ********** //
     TOP_AC_TO_BOTTOM_AC, // 上AC - 下AC

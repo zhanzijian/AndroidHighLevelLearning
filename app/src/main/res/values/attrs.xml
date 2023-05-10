@@ -27,6 +27,7 @@
         <attr name="acIcon" format="reference"/>
         <attr name="acPowerText" format="string" localization="suggested" />
         <attr name="acElementName" format="string" localization="suggested" />
+        <attr name="acShowPowerText" format="boolean" localization="suggested" />
 
     </declare-styleable>
 </resources>

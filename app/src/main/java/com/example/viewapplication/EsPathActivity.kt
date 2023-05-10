@@ -15,7 +15,9 @@ class EsPathActivity : AppCompatActivity() {
             EsAnimationDirection.PV_TO_INVERTER,
             EsAnimationDirection.GRID_TO_INVERTER,
             EsAnimationDirection.BATTERY_TO_INVERTER,
-            EsAnimationDirection.INVERTER_TO_BACKUP_LOAD
+            EsAnimationDirection.INVERTER_TO_BACKUP_LOAD,
+            EsAnimationDirection.GRID_TO_GRID_LOAD,
+            EsAnimationDirection.INVERTER_TO_GRID_LOAD,
         )
         val list2 = arrayListOf(
             EsAnimationDirection.PV_TO_INVERTER,
@@ -24,9 +26,12 @@ class EsPathActivity : AppCompatActivity() {
             EsAnimationDirection.INVERTER_TO_BACKUP_LOAD
         )
         binding.start1.setOnClickListener {
+            binding.path.isStationOffline = false
+            binding.path.isPvOffline = false
             binding.path.startBallAnimations(list1)
         }
         binding.end1.setOnClickListener {
+            binding.path.isStationOffline = true
             binding.path.endBallAnimations(list1)
         }
         binding.start2.setOnClickListener {

@@ -43,6 +43,7 @@
     <color name="gray_fcfdfe_color">#FCFDFE</color>
     <color name="gray_d1d2d6_color">#D1D2D6</color>
     <color name="gray_4d_99_color">#4d999999</color><!--30% alpha-->
+    <color name="gray_33_99_color">#33999999</color><!--20% alpha-->
     <color name="gray_f8fafc_color">#F8FAFC</color>
     <color name="gray_ee_color">#eeeeee</color>
     <color name="gray_828490_color">#828490</color>
@@ -61,8 +62,9 @@
     <color name="orange_fdf2e8_color">#FDF2E8</color>
     <color name="orange_fdf2e5_color">#FDF2E5</color>
     <color name="orange_fda23a_color">#FDA23A</color>
+    <color name="orange_f9ad57_color">#f9ad57</color>
     <color name="orange_4d_fda23a_color">#4dfda23a</color><!--30% alpha-->
-    <color name="orange_33_fda23a_color">#33F9AD57</color><!--20% alpha-->
+    <color name="orange_33_f9ad57_color">#33F9AD57</color><!--20% alpha-->
     <color name="orange_fef9f4_color">#fef9f4</color>
     <color name="orange_ff8300_color">#ff8300</color>
     <color name="yellow_fcf3d1_color">#EBFCF3D1</color>
@@ -71,6 +73,8 @@
     <color name="yellow_4d_f0cf00_color">#4df0cf00</color><!--30% alpha-->
     <color name="yellow_33_f0cf00_color">#33f0cf00</color><!--20% alpha-->
     <color name="yellow_ff7800_color">#ff7800</color>
+    <color name="blue_06b389_color">#06b389</color>
+    <color name="blue_4d_06b389_color">#4d06b389</color>
     <color name="blue_316eb4">#316eb4</color>
     <color name="blue_5f91cb_color">#5F91CB</color>
     <color name="blue_4a90e2_color">#4A90E2</color>
@@ -78,6 +82,8 @@
     <color name="blue_33_5f91cb_color">#335f91cb</color><!--20% alpha-->
     <color name="blue_4d_3d7bco_color">#4D3D7BC0</color><!--30% alpha-->
     <color name="green_aed681_color">#AED681</color>
+    <color name="green_aada76_color">#AADA76</color>
+    <color name="green_4d_aada76_color">#4dAADA76</color><!--30% alpha-->
     <color name="green_649d4f_color">#649d4f</color>
     <color name="green_4d_aed681_color">#4daed681</color><!--30% alpha-->
     <color name="green_33_aed681_color">#33aed681</color><!--20% alpha-->
@@ -89,6 +95,8 @@
     <color name="red_66_d45559_color">#66d45559</color><!--40% alpha-->
     <color name="red_4d_f56d66_color">#4dF56D66</color><!--30% alpha-->
     <color name="red_33_f56d66_color">#33F56D66</color><!--20% alpha-->
+    <color name="purple_b676da_color">#B676DA</color>
+    <color name="purple_33_b676da_color">#33b676da</color><!--20% alpha-->
     <color name="purple_ae69b5_color">#AE69B5</color>
     <color name="purple_80_ae69b5_color">#80AE69B5</color><!--50% alpha-->
     <color name="purple_4d_ae69b5_color">#4dAE69B5</color><!--30% alpha-->

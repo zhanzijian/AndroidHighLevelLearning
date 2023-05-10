@@ -6,6 +6,8 @@ import android.util.SparseArray
 import com.example.viewapplication.R
 import com.example.viewapplication.dp
 import com.example.viewapplication.getColorById
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  *
@@ -14,6 +16,7 @@ import com.example.viewapplication.getColorById
  * @date 2022/09/28 15:56
  */
 class EsConfiguration private constructor(private val mContext: Context) {
+
     val horizontalDistance = 36f.dp
     val verticalDistance = 146f.dp
     val arcRadius = 20f.dp
@@ -29,6 +32,46 @@ class EsConfiguration private constructor(private val mContext: Context) {
 
     private val pathStrokeWidth = 2f.dp
 
+    val horizontalExtra = 2f.dp // 横向额外移动距离
+    val gridLoadDy = sqrt(circleRadius.pow(2) - (pathHorizontalPadding / 2).pow(2)) // 电网负载 y 轴方向上的增量，使用勾股定理
+
+    // ************* color ************** //
+    val orangeColor: Int
+        get() = getColorById(mContext, R.color.orange_fda23a_color)
+    val p33OrangeColor: Int
+        get() = getColorById(mContext, R.color.orange_33_f9ad57_color)
+    val orangeF9AD57Color: Int
+        get() = getColorById(mContext, R.color.orange_f9ad57_color)
+    val p33OrangeF9AD57Color: Int
+        get() = getColorById(mContext, R.color.orange_33_f9ad57_color)
+    val yellowColor: Int
+        get() = getColorById(mContext, R.color.yellow_f0cf00_color)
+    val p33YellowColor: Int
+        get() = getColorById(mContext, R.color.yellow_33_f0cf00_color)
+    val redColor: Int
+        get() = getColorById(mContext, R.color.red_f56d66_color)
+    val p33RedColor: Int
+        get() = getColorById(mContext, R.color.red_33_f56d66_color)
+    val greenColor: Int
+        get() = getColorById(mContext, R.color.green_aada76_color)
+    val p33GreenColor: Int
+        get() = getColorById(mContext, R.color.green_4d_aada76_color)
+    val blue06b389Color: Int
+        get() = getColorById(mContext, R.color.blue_06b389_color)
+    val p33Blue06b389Color: Int
+        get() = getColorById(mContext, R.color.blue_4d_06b389_color)
+    val blueColor: Int
+        get() = getColorById(mContext, R.color.blue_5f91cb_color)
+    val p33BlueColor: Int
+        get() = getColorById(mContext, R.color.blue_4d_5f91cb_color)
+    val purpleColor: Int
+        get() = getColorById(mContext, R.color.purple_b676da_color)
+    val p33PurpleColor: Int
+        get() = getColorById(mContext, R.color.purple_33_b676da_color)
+
+    val offlineColor: Int
+        get() = getColorById(mContext, R.color.gray_cc_color)
+    
     // ************* paint ************** //
 
     val strokeCirclePaint by lazy {
@@ -64,7 +107,13 @@ class EsConfiguration private constructor(private val mContext: Context) {
             strokeWidth = pathStrokeWidth
         }
     }
-
+    val offlinePaint by lazy {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = pathStrokeWidth
+            color = offlineColor
+        }
+    }
 
 
     val animationDuration: Long = ANIMATION_DURATION
@@ -75,6 +124,22 @@ class EsConfiguration private constructor(private val mContext: Context) {
 
         private const val ANIMATION_START_DELAY = 300L // 动画运行时长
         private const val ANIMATION_DURATION = 2000L // 动画运行时长
+
+        /**
+         * 球体缩小最小比例
+         */
+        const val MIN_BALL_PROPORTION = 0.4f
+
+        /**
+         * 球体增大最大比例
+         */
+        const val MAX_BALL_PROPORTION = 1.0f
+
+        /**
+         * 电池背景宽度
+         */
+        const val BATTERY_BACKGROUND_WIDTH = 25f
+
         fun get(context: Context): EsConfiguration {
 
             val metrics = context.resources.displayMetrics
